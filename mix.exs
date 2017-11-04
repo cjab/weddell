@@ -14,6 +14,7 @@ defmodule Pubsub.Mixfile do
   # Run "mix help compile.app" to learn about applications.
   def application do
     [
+      mod: {Pubsub, []},
       extra_applications: [:logger]
     ]
   end
@@ -22,7 +23,7 @@ defmodule Pubsub.Mixfile do
   defp deps do
     [
       {:protobuf, "~> 0.3"},
-      {:grpc, github: "tony612/grpc-elixir"},
+      {:grpc, path: "../grpc-elixir"},
     ]
   end
 end
