@@ -1,6 +1,6 @@
 defmodule Pubsub.Client do
   @moduledoc """
-  Documentation for Pubsub.
+  A persistent process responsible for interacting with Pusub over GRPC.
   """
   use GenServer
 
@@ -15,13 +15,32 @@ defmodule Pubsub.Client do
   alias Google_Pubsub_V1.Publisher.Stub, as: Publisher
   alias Google_Pubsub_V1.Subscriber.Stub, as: Subscriber
 
+  @doc """
+  Start the client process and connect to Pubsub using settings in the application config.
+
+  ## Example
+
+  In your application config:
+
+      config :pubsub,
+        host: "localhost",
+        port: 8085,
+        project: "test-project"
+
+  ## Settings
+
+    * `project` - The __required__ Google Cloud project that will be used for all calls made by this client.
+    * `host` - The pubsub host to connect to. This defaults to Google's pubsub service but
+      is useful for connecting to a local pubsub emulator _(default: "pubsub.googleapis.com")_
+    * `port` - The port on which to connect to the host. _(default: 443)_
+  """
   def start_link do
     GenServer.start_link(__MODULE__, :ok, name: __MODULE__)
   end
 
   def init(:ok) do
-    host = Application.get_env(:pubsub, :host)
-    port = Application.get_env(:pubsub, :port)
+    host = Application.get_env(:pubsub, :host, "pubsub.googleapis.com")
+    port = Application.get_env(:pubsub, :port, 443)
     project = Application.get_env(:pubsub, :project)
     {:ok, channel} = Stub.connect("#{host}:#{port}")
     {:ok, {channel, project}}
@@ -35,7 +54,7 @@ defmodule Pubsub.Client do
   end
 
   def handle_call({:create_subscription, name, topic, opts}, _from, {channel, project} = state) do
-    ack_deadline = Keyword.get(opts, :ack_deadline_seconds, nil)
+    ack_deadline = Keyword.get(opts, :ack_deadline_seconds, 10)
     push_config = case Keyword.get(opts, :push_endpoint, nil) do
       nil -> nil
       endpoint -> PushConfig.new(push_endpoint: endpoint)
@@ -56,9 +75,10 @@ defmodule Pubsub.Client do
     request = PublishRequest.new(topic: full_topic(project, topic),
                                  messages: messages,
                                  attributes: %{})
-    channel
-    |> Publisher.publish(request)
-    {:reply, :ok, state}
+    result =
+      channel
+      |> Publisher.publish(request)
+    {:reply, result, state}
   end
 
   def handle_call({:pull, subscription, opts}, _from, {channel, project} = state) do

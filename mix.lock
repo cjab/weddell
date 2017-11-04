@@ -1,6 +1,8 @@
 %{"chatterbox": {:git, "https://github.com/tony612/chatterbox.git", "c7c2ab4c3e74618cfa78fdbf6444fac3952d194b", [branch: "my-fix"]},
   "cowboy": {:git, "https://github.com/tony612/cowboy.git", "d047a94f7c2f94118f924724a62ce90f1cac4282", [branch: "my-fix"]},
   "cowlib": {:git, "https://github.com/ninenines/cowlib", "11e07d3c2b164d06ad35188d83ad70e7501396db", [ref: "2.0.0-rc.1"]},
+  "earmark": {:hex, :earmark, "1.2.3", "206eb2e2ac1a794aa5256f3982de7a76bf4579ff91cb28d0e17ea2c9491e46a4", [], [], "hexpm"},
+  "ex_doc": {:hex, :ex_doc, "0.18.1", "37c69d2ef62f24928c1f4fdc7c724ea04aecfdf500c4329185f8e3649c915baf", [], [{:earmark, "~> 1.1", [hex: :earmark, repo: "hexpm", optional: false]}], "hexpm"},
   "goldrush": {:git, "https://github.com/basho/goldrush.git", "8f1b715d36b650ec1e1f5612c00e28af6ab0de82", [tag: "0.1.9"]},
   "grpc": {:git, "https://github.com/tony612/grpc-elixir.git", "87066828170f535330615f15dfe800b74380efdb", []},
   "hpack": {:git, "https://github.com/joedevivo/hpack.git", "6b58b6231e9b6ab83096715120578976f72f4f7c", [tag: "0.2.3"]},
