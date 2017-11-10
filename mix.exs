@@ -25,6 +25,7 @@ defmodule Pubsub.Mixfile do
       {:ex_doc, "~> 0.16", only: :dev, runtime: false},
       {:protobuf, "~> 0.3"},
       {:grpc, path: "../grpc-elixir"},
+      {:goth, "~> 0.7"},
     ]
   end
 end

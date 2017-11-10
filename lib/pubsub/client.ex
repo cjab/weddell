@@ -42,14 +42,16 @@ defmodule Pubsub.Client do
     host = Application.get_env(:pubsub, :host, "pubsub.googleapis.com")
     port = Application.get_env(:pubsub, :port, 443)
     project = Application.get_env(:pubsub, :project)
-    {:ok, channel} = Stub.connect("#{host}:#{port}")
+    {:ok, channel} =
+      Stub.connect("#{host}:#{port}",
+                   cred: GRPC.Credential.client_tls("/home/cjab/Downloads/roots.pem"))
     {:ok, {channel, project}}
   end
 
   def handle_call({:create_topic, name}, _from, {channel, project} = state) do
     topic = Topic.new(name: full_topic(project, name))
     channel
-    |> Publisher.create_topic(topic)
+    |> Publisher.create_topic(topic, metadata())
     {:reply, :ok, state}
   end
 
@@ -64,7 +66,7 @@ defmodule Pubsub.Client do
                                     push_config: push_config,
                                     ack_deadline_seconds: ack_deadline)
     channel
-    |> Subscriber.create_subscription(subscription)
+    |> Subscriber.create_subscription(subscription, metadata())
     {:reply, :ok, state}
   end
 
@@ -77,7 +79,7 @@ defmodule Pubsub.Client do
                                  attributes: %{})
     result =
       channel
-      |> Publisher.publish(request)
+      |> Publisher.publish(request, metadata())
     {:reply, result, state}
   end
 
@@ -87,7 +89,7 @@ defmodule Pubsub.Client do
                               max_messages: Keyword.get(opts, :max_messages, 1))
     result =
       channel
-      |> Subscriber.pull(request)
+      |> Subscriber.pull(request, metadata())
     {:reply, result, state}
   end
 
@@ -97,7 +99,7 @@ defmodule Pubsub.Client do
     request = AcknowledgeRequest.new(subscription: full_subscription(project, subscription),
                                      ack_ids: ack_ids)
     channel
-    |> Subscriber.acknowledge(request)
+    |> Subscriber.acknowledge(request, metadata())
     {:reply, :ok, state}
   end
 
@@ -106,4 +108,12 @@ defmodule Pubsub.Client do
   defp full_topic(project, name), do: "projects/#{project}/topics/#{name}"
 
   defp full_subscription(project, name), do: "projects/#{project}/subscriptions/#{name}"
+
+  defp metadata, do: [metadata: auth_header()]
+
+  defp auth_header do
+    {:ok, %{token: token, type: token_type}} =
+      Goth.Token.for_scope("https://www.googleapis.com/auth/pubsub")
+    %{"authorization" => "#{token_type} #{token}"}
+  end
 end
