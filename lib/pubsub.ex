@@ -49,6 +49,18 @@ defmodule Pubsub do
   end
 
   @doc """
+  Deletes a topic belonging to the configured project.
+
+  ## Examples
+      Pubsub.delete_topic("foo")
+      #=> :ok
+  """
+  @spec delete_topic(topic_name :: String.t) :: :ok | error
+  def delete_topic(name) do
+    GenServer.call(Pubsub.Client, {:delete_topic, name})
+  end
+
+  @doc """
   Creates a new subscription belonging to the topic and
   the configured project.
 
@@ -72,6 +84,18 @@ defmodule Pubsub do
                             topic_name :: String.t, subscription_options) :: :ok | error
   def create_subscription(name, topic, opts \\ []) do
     GenServer.call(Pubsub.Client, {:create_subscription, name, topic, opts})
+  end
+
+  @doc """
+  Deletes a subscription belonging to the configured project.
+
+  ## Examples
+      Pubsub.delete_subscription("foo")
+      #=> :ok
+  """
+  @spec delete_subscription(subscription_name :: String.t) :: :ok | error
+  def delete_subscription(name) do
+    GenServer.call(Pubsub.Client, {:delete_subscription, name})
   end
 
   @doc """

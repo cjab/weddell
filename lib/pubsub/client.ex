@@ -15,6 +15,8 @@ defmodule Pubsub.Client do
   alias Google_Pubsub_V1.PublishRequest
   alias Google_Pubsub_V1.PublishResponse
   alias Google_Pubsub_V1.AcknowledgeRequest
+  alias Google_Pubsub_V1.DeleteTopicRequest
+  alias Google_Pubsub_V1.DeleteSubscriptionRequest
   alias Google_Pubsub_V1.Publisher.Stub, as: Publisher
   alias Google_Pubsub_V1.Subscriber.Stub, as: Subscriber
 
@@ -57,7 +59,19 @@ defmodule Pubsub.Client do
     |> case do
       {:error, _rpc_error} = error ->
         {:reply, error, state}
-      {:ok, _topic} ->
+      {:ok, %Topic{}} ->
+        {:reply, :ok, state}
+    end
+  end
+
+  def handle_call({:delete_topic, name}, _from, {channel, project} = state) do
+    request = DeleteTopicRequest.new(name: full_topic(project, name))
+    channel
+    |> Publisher.delete_topic(request, metadata())
+    |> case do
+      {:error, _rpc_error} = error ->
+        {:reply, error, state}
+      {:ok, %Empty{}} ->
         {:reply, :ok, state}
     end
   end
@@ -78,6 +92,20 @@ defmodule Pubsub.Client do
       {:error, _rpc_error} = error ->
         {:reply, error, state}
       {:ok, _subscription} ->
+        {:reply, :ok, state}
+    end
+  end
+
+  def handle_call({:delete_subscription, name}, _from, {channel, project} = state) do
+    request =
+      DeleteSubscriptionRequest.new(
+        subscription: full_subscription(project, name))
+    channel
+    |> Subscriber.delete_subscripion(request, metadata())
+    |> case do
+      {:error, _rpc_error} = error ->
+        {:reply, error, state}
+      {:ok, %Empty{}} ->
         {:reply, :ok, state}
     end
   end
