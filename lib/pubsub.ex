@@ -5,9 +5,13 @@ defmodule Pubsub do
   use Application
 
   alias Pubsub.Client
+  alias GRPC.RPCError
 
   @typedoc "WIP: What is this?"
   @type message :: any
+
+  @typedoc "An RPC error"
+  @type error :: {:error, RPCError.t}
 
   @typedoc "Option values used when pulling messages"
   @type pull_option :: {:return_immediately, boolean} |
@@ -39,7 +43,7 @@ defmodule Pubsub do
       Pubsub.create_topic("foo")
       #=> :ok
   """
-  @spec create_topic(topic_name :: String.t) :: :ok
+  @spec create_topic(topic_name :: String.t) :: :ok | error
   def create_topic(name) do
     GenServer.call(Pubsub.Client, {:create_topic, name})
   end
@@ -65,7 +69,7 @@ defmodule Pubsub do
       use "https://example.com/push". _(default: nil)_
   """
   @spec create_subscription(subscription_name :: String.t,
-                            topic_name :: String.t, subscription_options) :: :ok
+                            topic_name :: String.t, subscription_options) :: :ok | error
   def create_subscription(name, topic, opts \\ []) do
     GenServer.call(Pubsub.Client, {:create_subscription, name, topic, opts})
   end
@@ -79,7 +83,8 @@ defmodule Pubsub do
       #=> :ok
 
   """
-  @spec publish(data :: String.t, topic_name :: String.t) :: :ok
+  @spec publish(data :: String.t, topic_name :: String.t) ::
+    {:ok, message_ids :: [String.t]} | error
   def publish(data, topic) do
     GenServer.call(Pubsub.Client, {:publish, data, topic})
   end
@@ -101,7 +106,8 @@ defmodule Pubsub do
     * `:max_messages` - The maximum number of messages to be returned,
       it may be fewer. _(default: 10)_
   """
-  @spec pull(subscription_name :: String.t, pull_options) :: [message]
+  @spec pull(subscription_name :: String.t, pull_options) ::
+    {:ok, messages :: [message]} | error
   def pull(subscription, opts \\ []) do
     GenServer.call(Pubsub.Client, {:pull, subscription, opts})
   end
@@ -116,7 +122,7 @@ defmodule Pubsub do
       Pubsub.acknowledge(ack_ids, "foo-subscription")
       #=> :ok
   """
-  @spec acknowledge(ack_ids :: [String.t], subscription_name :: String.t) :: :ok
+  @spec acknowledge(ack_ids :: [String.t], subscription_name :: String.t) :: :ok | error
   def acknowledge(ack_ids, subscription) do
     GenServer.call(Pubsub.Client, {:acknowledge, ack_ids, subscription})
   end

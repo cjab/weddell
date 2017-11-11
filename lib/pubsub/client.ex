@@ -5,12 +5,15 @@ defmodule Pubsub.Client do
   use GenServer
 
   alias GRPC.Stub
+  alias Google_Protobuf.Empty
   alias Google_Pubsub_V1.Topic
   alias Google_Pubsub_V1.PushConfig
   alias Google_Pubsub_V1.PullRequest
+  alias Google_Pubsub_V1.PullResponse
   alias Google_Pubsub_V1.Subscription
   alias Google_Pubsub_V1.PubsubMessage
   alias Google_Pubsub_V1.PublishRequest
+  alias Google_Pubsub_V1.PublishResponse
   alias Google_Pubsub_V1.AcknowledgeRequest
   alias Google_Pubsub_V1.Publisher.Stub, as: Publisher
   alias Google_Pubsub_V1.Subscriber.Stub, as: Subscriber
@@ -43,8 +46,7 @@ defmodule Pubsub.Client do
     port = Application.get_env(:pubsub, :port, 443)
     project = Application.get_env(:pubsub, :project)
     {:ok, channel} =
-      Stub.connect("#{host}:#{port}",
-                   cred: GRPC.Credential.client_tls("/home/cjab/Downloads/roots.pem"))
+      Stub.connect("#{host}:#{port}")
     {:ok, {channel, project}}
   end
 
@@ -52,7 +54,12 @@ defmodule Pubsub.Client do
     topic = Topic.new(name: full_topic(project, name))
     channel
     |> Publisher.create_topic(topic, metadata())
-    {:reply, :ok, state}
+    |> case do
+      {:error, _rpc_error} = error ->
+        {:reply, error, state}
+      {:ok, _topic} ->
+        {:reply, :ok, state}
+    end
   end
 
   def handle_call({:create_subscription, name, topic, opts}, _from, {channel, project} = state) do
@@ -67,7 +74,12 @@ defmodule Pubsub.Client do
                                     ack_deadline_seconds: ack_deadline)
     channel
     |> Subscriber.create_subscription(subscription, metadata())
-    {:reply, :ok, state}
+    |> case do
+      {:error, _rpc_error} = error ->
+        {:reply, error, state}
+      {:ok, _subscription} ->
+        {:reply, :ok, state}
+    end
   end
 
   def handle_call({:publish, data, topic}, from, state) when not is_list(data),
@@ -77,20 +89,28 @@ defmodule Pubsub.Client do
     request = PublishRequest.new(topic: full_topic(project, topic),
                                  messages: messages,
                                  attributes: %{})
-    result =
-      channel
-      |> Publisher.publish(request, metadata())
-    {:reply, result, state}
+    channel
+    |> Publisher.publish(request, metadata())
+    |> case do
+      {:error, _rpc_error} = error ->
+        {:reply, error, state}
+      {:ok, %PublishResponse{message_ids: ids}} ->
+        {:reply, {:ok, ids}, state}
+    end
   end
 
   def handle_call({:pull, subscription, opts}, _from, {channel, project} = state) do
     request = PullRequest.new(subscription: full_subscription(project, subscription),
                               return_immediately: Keyword.get(opts, :return_immediately, true),
                               max_messages: Keyword.get(opts, :max_messages, 1))
-    result =
-      channel
-      |> Subscriber.pull(request, metadata())
-    {:reply, result, state}
+    channel
+    |> Subscriber.pull(request, metadata())
+    |> case do
+      {:error, _rpc_error} = error ->
+        {:reply, error, state}
+      {:ok, %PullResponse{received_messages: messages}} ->
+        {:reply, {:ok, messages}, state}
+    end
   end
 
   def handle_call({:acknowledge, ack_id, subscription}, from, state) when not is_list(ack_id),
@@ -100,7 +120,12 @@ defmodule Pubsub.Client do
                                      ack_ids: ack_ids)
     channel
     |> Subscriber.acknowledge(request, metadata())
-    {:reply, :ok, state}
+    |> case do
+      {:error, _rpc_error} = error ->
+        {:reply, error, state}
+      {:ok, %Empty{}} ->
+        {:reply, :ok, state}
+    end
   end
 
   def handle_info(_, state), do: {:noreply, state}
