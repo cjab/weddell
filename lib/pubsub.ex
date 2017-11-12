@@ -13,6 +13,9 @@ defmodule Pubsub do
   @typedoc "An RPC error"
   @type error :: {:error, RPCError.t}
 
+  @typedoc "A cursor used for pagination of lists"
+  @type cursor :: String.t
+
   @typedoc "Option values used when pulling messages"
   @type pull_option :: {:return_immediately, boolean} |
                        {:max_messages, pos_integer}
@@ -26,6 +29,13 @@ defmodule Pubsub do
 
   @typedoc "Options used when creating a subscription"
   @type subscription_options :: [subscription_option]
+
+  @typedoc "Option value used when retrieving lists"
+  @type list_option :: {:max, pos_integer} |
+                       {:cursor, cursor}
+
+  @typedoc "Option values used when retrieving lists"
+  @type list_options :: [list_option]
 
   @doc """
   """
@@ -58,6 +68,34 @@ defmodule Pubsub do
   @spec delete_topic(topic_name :: String.t) :: :ok | error
   def delete_topic(name) do
     GenServer.call(Pubsub.Client, {:delete_topic, name})
+  end
+
+  @doc """
+  List topics belonging to the configured project.
+
+  ## Examples
+
+      Pubsub.topics(max: 50)
+      #=> {:ok, ["foo", "bar", ...]}
+
+  When more topics exist:
+
+      Pubsub.topics(max: 1)
+      #=> {:ok, ["foo"], "list-cursor"}
+
+  ## Options
+
+    * `:max` - The maximum number of topics to return fromn a single request.
+      If more topics exist make another call using the returned cursor.
+      _(default: 50)_
+    * `:cursor` - List topics starting at a cursor returned by an earlier call.
+      _(default: nil)_
+  """
+  @spec topics(opts :: list_options) :: {:ok, topic_names :: [String.t]} |
+                                        {:ok, topic_names :: [String.t], cursor} |
+                                        error
+  def topics(opts \\ []) do
+    GenServer.call(Pubsub.Client, {:topics, opts})
   end
 
   @doc """
@@ -96,6 +134,35 @@ defmodule Pubsub do
   @spec delete_subscription(subscription_name :: String.t) :: :ok | error
   def delete_subscription(name) do
     GenServer.call(Pubsub.Client, {:delete_subscription, name})
+  end
+
+  @doc """
+  List subscriptions belonging to the configured project and optionally a topic.
+
+  ## Examples
+
+      Pubsub.subscriptions(max: 50)
+      #=> {:ok, [%Subscription{}, %Subscription{}, ...]}
+
+  When more subscriptions exist:
+
+      Pubsub.subscriptions(max: 1)
+      #=> {:ok, [%Subscription{}], "list-cursor"}
+
+  ## Options
+
+    * `:max` - The maximum number of subscriptions to return fromn a single request.
+      If more subscriptions exist make another call using the returned cursor.
+      _(default: 50)_
+    * `:cursor` - List subscriptions starting at a cursor returned by an earlier call.
+      _(default: nil)_
+  """
+  @spec subscriptions(opts :: subscription_list_options) ::
+    {:ok, subscriptions :: [Subscription.t]} |
+    {:ok, subscriptions :: [Subscription.t], cursor} |
+    error
+  def subscriptions(opts \\ []) do
+    GenServer.call(Pubsub.Client, {:subscriptions, opts})
   end
 
   @doc """

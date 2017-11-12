@@ -14,11 +14,15 @@ defmodule Pubsub.Client do
   alias Google_Pubsub_V1.PubsubMessage
   alias Google_Pubsub_V1.PublishRequest
   alias Google_Pubsub_V1.PublishResponse
+  alias Google_Pubsub_V1.ListTopicsRequest
+  alias Google_Pubsub_V1.ListTopicsResponse
   alias Google_Pubsub_V1.AcknowledgeRequest
   alias Google_Pubsub_V1.DeleteTopicRequest
   alias Google_Pubsub_V1.DeleteSubscriptionRequest
   alias Google_Pubsub_V1.Publisher.Stub, as: Publisher
   alias Google_Pubsub_V1.Subscriber.Stub, as: Subscriber
+
+  @default_list_max 50
 
   @doc """
   Start the client process and connect to Pubsub using settings in the application config.
@@ -73,6 +77,24 @@ defmodule Pubsub.Client do
         {:reply, error, state}
       {:ok, %Empty{}} ->
         {:reply, :ok, state}
+    end
+  end
+
+  def handle_call({:topics, opts}, _from, {channel, project} = state) do
+    max_topics = Keyword.get(opts, :max, @default_list_max)
+    cursor = Keyword.get(opts, :cursor, "")
+    request = ListTopicsRequest.new(project: "projects/#{project}",
+                                    page_size: max_topics,
+                                    page_token: cursor)
+    channel
+    |> Publisher.list_topics(request, metadata())
+    |> case do
+      {:error, _rpc_error} = error ->
+        {:reply, error, state}
+      {:ok, %ListTopicsResponse{topics: topics, next_page_token: ""}} ->
+        {:reply, {:ok, Enum.map(topics, &(&1.name))}, state}
+      {:ok, %ListTopicsResponse{topics: topics, next_page_token: next_cursor}} ->
+        {:reply, {:ok, Enum.map(topics, &(&1.name)), next_cursor}, state}
     end
   end
 
