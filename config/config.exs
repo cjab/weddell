@@ -29,9 +29,9 @@ use Mix.Config
 #
 #     import_config "#{Mix.env}.exs"
 config :pubsub,
-  host: "localhost",
-  port: 8085,
-  project: "test-project"
+# host: "localhost",
+# port: 4343,
+  project: "elixir-pubsub"
 
 config :goth,
   json: "/Users/cjab/Downloads/elixir-pubsub-b5422e66ef94.json" |> File.read!()

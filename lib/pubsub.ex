@@ -137,17 +137,17 @@ defmodule Pubsub do
   end
 
   @doc """
-  List subscriptions belonging to the configured project and optionally a topic.
+  List subscription details belonging to the configured project.
 
   ## Examples
 
       Pubsub.subscriptions(max: 50)
-      #=> {:ok, [%Subscription{}, %Subscription{}, ...]}
+      #=> {:ok, [%SubscriptionDetails{}, %SubscriptionDetails{}, ...]}
 
   When more subscriptions exist:
 
       Pubsub.subscriptions(max: 1)
-      #=> {:ok, [%Subscription{}], "list-cursor"}
+      #=> {:ok, [%SubscriptionDetails{}], "list-cursor"}
 
   ## Options
 
@@ -157,9 +157,9 @@ defmodule Pubsub do
     * `:cursor` - List subscriptions starting at a cursor returned by an earlier call.
       _(default: nil)_
   """
-  @spec subscriptions(opts :: subscription_list_options) ::
-    {:ok, subscriptions :: [Subscription.t]} |
-    {:ok, subscriptions :: [Subscription.t], cursor} |
+  @spec subscriptions(opts :: list_options) ::
+    {:ok, subscriptions :: [SubscriptionDetails.t]} |
+    {:ok, subscriptions :: [SubscriptionDetails.t], cursor} |
     error
   def subscriptions(opts \\ []) do
     GenServer.call(Pubsub.Client, {:subscriptions, opts})

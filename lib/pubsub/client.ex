@@ -18,9 +18,14 @@ defmodule Pubsub.Client do
   alias Google_Pubsub_V1.ListTopicsResponse
   alias Google_Pubsub_V1.AcknowledgeRequest
   alias Google_Pubsub_V1.DeleteTopicRequest
+  alias Google_Pubsub_V1.ListSubscriptionsRequest
+  alias Google_Pubsub_V1.ListSubscriptionsResponse
   alias Google_Pubsub_V1.DeleteSubscriptionRequest
+  alias Google_Pubsub_V1.ListSubscriptionRequest
   alias Google_Pubsub_V1.Publisher.Stub, as: Publisher
   alias Google_Pubsub_V1.Subscriber.Stub, as: Subscriber
+
+  alias Pubsub.SubscriptionDetails
 
   @default_list_max 50
 
@@ -48,11 +53,13 @@ defmodule Pubsub.Client do
   end
 
   def init(:ok) do
+    ca_path = "/usr/local/etc/openssl/cert.pem"
+    cred = GRPC.Credential.client_tls(ca_path)
     host = Application.get_env(:pubsub, :host, "pubsub.googleapis.com")
     port = Application.get_env(:pubsub, :port, 443)
     project = Application.get_env(:pubsub, :project)
     {:ok, channel} =
-      Stub.connect("#{host}:#{port}")
+      Stub.connect("#{host}:#{port}", cred: cred)
     {:ok, {channel, project}}
   end
 
@@ -123,12 +130,32 @@ defmodule Pubsub.Client do
       DeleteSubscriptionRequest.new(
         subscription: full_subscription(project, name))
     channel
-    |> Subscriber.delete_subscripion(request, metadata())
+    |> Subscriber.delete_subscription(request, metadata())
     |> case do
       {:error, _rpc_error} = error ->
         {:reply, error, state}
       {:ok, %Empty{}} ->
         {:reply, :ok, state}
+    end
+  end
+
+  def handle_call({:subscriptions, opts}, _from, {channel, project} = state) do
+    max_topics = Keyword.get(opts, :max, @default_list_max)
+    cursor = Keyword.get(opts, :cursor, "")
+    request = ListSubscriptionsRequest.new(project: "projects/#{project}",
+                                    page_size: max_topics,
+                                    page_token: cursor)
+    channel
+    |> Subscriber.list_subscriptions(request, metadata())
+    |> case do
+      {:error, _rpc_error} = error ->
+        {:reply, error, state}
+      {:ok, %ListSubscriptionsResponse{next_page_token: ""} = response} ->
+        details = Enum.map(response.subscriptions, &(SubscriptionDetails.new(&1)))
+        {:reply, {:ok, details}, state}
+      {:ok, %ListSubscriptionsResponse{next_page_token: next_cursor} = response} ->
+        details = Enum.map(response.subscriptions, &(SubscriptionDetails.new(&1)))
+        {:reply, {:ok, details, next_cursor}, state}
     end
   end
 
@@ -184,11 +211,15 @@ defmodule Pubsub.Client do
 
   defp full_subscription(project, name), do: "projects/#{project}/subscriptions/#{name}"
 
-  defp metadata, do: [metadata: auth_header()]
+  defp metadata, do: [metadata: auth_header(), content_type: "application/grpc"]
 
   defp auth_header do
     {:ok, %{token: token, type: token_type}} =
       Goth.Token.for_scope("https://www.googleapis.com/auth/pubsub")
     %{"authorization" => "#{token_type} #{token}"}
+  end
+
+  defp subscription_details(subscriptions) do
+    Enum.map(subscriptions, &(SubscriptionDetails.new(&1)))
   end
 end
