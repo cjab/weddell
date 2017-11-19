@@ -1,5 +1,6 @@
 defmodule Google_Protobuf.Empty do
-  use Protobuf, syntax: :proto3
+  @moduledoc false
+  use Protobuf
 
   defstruct []
 

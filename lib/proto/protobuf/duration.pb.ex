@@ -1,5 +1,6 @@
 defmodule Google_Protobuf.Duration do
-  use Protobuf, syntax: :proto3
+  @moduledoc false
+  use Protobuf
 
   @type t :: %__MODULE__{
     seconds: integer,
@@ -7,6 +8,6 @@ defmodule Google_Protobuf.Duration do
   }
   defstruct [:seconds, :nanos]
 
-  field :seconds, 1, type: :int64
-  field :nanos, 2, type: :int32
+  field :seconds, 1, optional: true, type: :int64
+  field :nanos, 2, optional: true, type: :int32
 end

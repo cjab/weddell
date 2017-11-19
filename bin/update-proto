@@ -1,18 +1,28 @@
 #!/bin/sh
 DIR="$( cd "$( dirname "$0" )/.." && pwd )"
 TMP_DIR=$DIR/tmp
-PLUGIN_PATH=/home/cjab/.asdf/installs/elixir/1.5.2/.mix/escripts/protoc-gen-elixir
+PLUGIN_PATH=/Users/cjab/.asdf/installs/elixir/1.5.0/.mix/escripts/protoc-gen-elixir
 OUT=$DIR/lib/proto
 PROTOBUF_PATH=$TMP_DIR/protobuf
 GOOGLEAPIS_PATH=$TMP_DIR/googleapis
+PROTOC_PATH=$TMP_DIR/protoc
+PROTOC=$PROTOC_PATH/bin/protoc
+PROTOC_URL=https://github.com/google/protobuf/releases/download/v3.5.0/protoc-3.5.0-osx-x86_64.zip
 
 cd $DIR
 mkdir -p $TMP_DIR
 
-if [ ! -d "$PROTOBUF_PATH" ]; then
-  git clone git@github.com:google/protobuf.git $PROTOBUF_PATH
+if [ ! -d "$PROTOC_PATH" ]; then
+  wget -O $TMP_DIR/protoc.zip $PROTOC_URL
+  cd $TMP_DIR
+  unzip protoc.zip -d $PROTOC_PATH
+  rm $TMP_DIR/protoc.zip
 fi
-cd $PROTOBUF_PATH && git pull && cd $DIR
+
+#if [ ! -d "$PROTOBUF_PATH" ]; then
+#  git clone git@github.com:google/protobuf.git $PROTOBUF_PATH
+#fi
+#cd $PROTOBUF_PATH && git pull && cd $DIR
 
 if [ ! -d "$GOOGLEAPIS_PATH" ]; then
   git clone git@github.com:googleapis/googleapis.git $GOOGLEAPIS_PATH
@@ -21,32 +31,32 @@ cd $GOOGLEAPIS_PATH && git pull && cd $DIR
 
 mkdir -p $OUT
 
-protoc -I $GOOGLEAPIS_PATH \
+$PROTOC -I $GOOGLEAPIS_PATH \
   --plugin=protoc-gen-elixir=$PLUGIN_PATH \
   --elixir_out=plugins=grpc:$OUT \
   $GOOGLEAPIS_PATH/google/api/annotations.proto
 
-protoc -I $GOOGLEAPIS_PATH \
+$PROTOC -I $GOOGLEAPIS_PATH \
   --plugin=protoc-gen-elixir=$PLUGIN_PATH \
   --elixir_out=plugins=grpc:$OUT \
   $GOOGLEAPIS_PATH/google/pubsub/v1/*.proto
 
-protoc -I $PROTOBUF_PATH/src/google \
+$PROTOC -I $PROTOC_PATH/include/google \
   --plugin=protoc-gen-elixir=$PLUGIN_PATH \
   --elixir_out=plugins=grpc:$OUT \
-  $PROTOBUF_PATH/src/google/protobuf/timestamp.proto
+  $PROTOC_PATH/include/google/protobuf/timestamp.proto
 
-protoc -I $PROTOBUF_PATH/src/google \
+$PROTOC -I $PROTOC_PATH/include/google \
   --plugin=protoc-gen-elixir=$PLUGIN_PATH \
   --elixir_out=plugins=grpc:$OUT \
-  $PROTOBUF_PATH/src/google/protobuf/field_mask.proto
+  $PROTOC_PATH/include/google/protobuf/field_mask.proto
 
-protoc -I $PROTOBUF_PATH/src/google \
+$PROTOC -I $PROTOC_PATH/include/google \
   --plugin=protoc-gen-elixir=$PLUGIN_PATH \
   --elixir_out=plugins=grpc:$OUT \
-  $PROTOBUF_PATH/src/google/protobuf/empty.proto
+  $PROTOC_PATH/include/google/protobuf/empty.proto
 
-protoc -I $PROTOBUF_PATH/src/google \
+$PROTOC -I $PROTOC_PATH/include/google \
   --plugin=protoc-gen-elixir=$PLUGIN_PATH \
   --elixir_out=plugins=grpc:$OUT \
-  $PROTOBUF_PATH/src/google/protobuf/duration.proto
+  $PROTOC_PATH/include/google/protobuf/duration.proto
