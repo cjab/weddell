@@ -39,6 +39,7 @@ defmodule Pubsub.Client do
       config :pubsub,
         host: "localhost",
         port: 8085,
+        ca_path: "/usr/local/etc/openssl/cert.pem",
         project: "test-project"
 
   ## Settings
@@ -47,14 +48,15 @@ defmodule Pubsub.Client do
     * `host` - The pubsub host to connect to. This defaults to Google's pubsub service but
       is useful for connecting to a local pubsub emulator _(default: "pubsub.googleapis.com")_
     * `port` - The port on which to connect to the host. _(default: 443)_
+    * `ca_path` - The path to a pem formatted ca cert chain. _(default: nil)_
   """
   def start_link do
     GenServer.start_link(__MODULE__, :ok, name: __MODULE__)
   end
 
   def init(:ok) do
-    ca_path = "/usr/local/etc/openssl/cert.pem"
-    cred = GRPC.Credential.client_tls(ca_path)
+    ca_path = Application.get_env(:pubsub, :ca_path)
+    cred = if ca_path, do: GRPC.Credential.client_tls(ca_path), else: nil
     host = Application.get_env(:pubsub, :host, "pubsub.googleapis.com")
     port = Application.get_env(:pubsub, :port, 443)
     project = Application.get_env(:pubsub, :project)
