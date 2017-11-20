@@ -1,5 +1,15 @@
 defmodule Pubsub.SubscriptionDetails do
+  @moduledoc """
+  A struct storing information about a subscription
+  """
   alias Google_Pubsub_V1.Subscription
+
+  @type t :: %__MODULE__{
+    name: String.t,
+    topic: String.t,
+    ack_deadline_seconds: pos_integer,
+    push_endpoint: String.t,
+    push_attributes: %{optional(String.t) => String.t}}
 
   defstruct [:name, :topic, :ack_deadline_seconds,
              :push_endpoint, :push_attributes]

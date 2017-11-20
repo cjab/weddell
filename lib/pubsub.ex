@@ -13,9 +13,6 @@ defmodule Pubsub do
   @typedoc "An RPC error"
   @type error :: {:error, RPCError.t}
 
-  @typedoc "A cursor used for pagination of lists"
-  @type cursor :: String.t
-
   @typedoc "Option values used when pulling messages"
   @type pull_option :: {:return_immediately, boolean} |
                        {:max_messages, pos_integer}
@@ -23,19 +20,6 @@ defmodule Pubsub do
   @typedoc "Options used when pulling messages"
   @type pull_options :: [pull_option]
 
-  @typedoc "Option values used when creating a subscription"
-  @type subscription_option :: {:ack_deadline, pos_integer} |
-                               {:push_endpoint, String.t}
-
-  @typedoc "Options used when creating a subscription"
-  @type subscription_options :: [subscription_option]
-
-  @typedoc "Option value used when retrieving lists"
-  @type list_option :: {:max, pos_integer} |
-                       {:cursor, cursor}
-
-  @typedoc "Option values used when retrieving lists"
-  @type list_options :: [list_option]
 
   @doc """
   """
@@ -91,9 +75,10 @@ defmodule Pubsub do
     * `:cursor` - List topics starting at a cursor returned by an earlier call.
       _(default: nil)_
   """
-  @spec topics(opts :: list_options) :: {:ok, topic_names :: [String.t]} |
-                                        {:ok, topic_names :: [String.t], cursor} |
-                                        error
+  @spec topics(opts :: Client.list_options) ::
+    {:ok, topic_names :: [String.t]} |
+    {:ok, topic_names :: [String.t], Client.cursor} |
+    error
   def topics(opts \\ []) do
     GenServer.call(Pubsub.Client, {:topics, opts})
   end
@@ -119,7 +104,8 @@ defmodule Pubsub do
       use "https://example.com/push". _(default: nil)_
   """
   @spec create_subscription(subscription_name :: String.t,
-                            topic_name :: String.t, subscription_options) :: :ok | error
+                            topic_name :: String.t,
+                            Client.subscription_options) :: :ok | error
   def create_subscription(name, topic, opts \\ []) do
     GenServer.call(Pubsub.Client, {:create_subscription, name, topic, opts})
   end
@@ -157,9 +143,9 @@ defmodule Pubsub do
     * `:cursor` - List subscriptions starting at a cursor returned by an earlier call.
       _(default: nil)_
   """
-  @spec subscriptions(opts :: list_options) ::
+  @spec subscriptions(opts :: Client.list_options) ::
     {:ok, subscriptions :: [SubscriptionDetails.t]} |
-    {:ok, subscriptions :: [SubscriptionDetails.t], cursor} |
+    {:ok, subscriptions :: [SubscriptionDetails.t], Client.cursor} |
     error
   def subscriptions(opts \\ []) do
     GenServer.call(Pubsub.Client, {:subscriptions, opts})
