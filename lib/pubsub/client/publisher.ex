@@ -38,7 +38,7 @@ defmodule Pubsub.Client.Publisher do
 
   @spec topics(Client.t, opts :: Client.list_opt) ::
     {:ok, [String.t]} | Client.error
-  def topics(client, opts) do
+  def topics(client, opts \\ []) do
     max_topics = Keyword.get(opts, :max, @default_list_max)
     cursor = Keyword.get(opts, :cursor, "")
     request = ListTopicsRequest.new(project: "projects/#{client.project}",

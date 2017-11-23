@@ -19,7 +19,7 @@ defmodule Pubsub.Client.Subscriber do
   @spec create_subscription(Client.t, name :: String.t,
                             topic :: String.t,
                             Client.subscription_options) :: :ok | Client.error
-  def create_subscription(client, name, topic, opts) do
+  def create_subscription(client, name, topic, opts \\ []) do
     ack_deadline = Keyword.get(opts, :ack_deadline_seconds, 10)
     push_config = case Keyword.get(opts, :push_endpoint, nil) do
       nil -> nil
@@ -56,7 +56,7 @@ defmodule Pubsub.Client.Subscriber do
     {:ok, [SubscriptionDetails.t]} |
     {:ok, [SubscriptionDetails.t], Client.cursor} |
     Client.error
-  def subscriptions(client, opts) do
+  def subscriptions(client, opts \\ []) do
     max_topics = Keyword.get(opts, :max, @default_list_max)
     cursor = Keyword.get(opts, :cursor, "")
     request = ListSubscriptionsRequest.new(project: "projects/#{client.project}",
@@ -75,7 +75,7 @@ defmodule Pubsub.Client.Subscriber do
     end
   end
 
-  def pull(client, subscription, opts) do
+  def pull(client, subscription, opts \\ []) do
     request =
       PullRequest.new(
         subscription: Util.full_subscription(client.project, subscription),
