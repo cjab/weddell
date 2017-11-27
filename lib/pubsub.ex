@@ -5,6 +5,7 @@ defmodule Pubsub do
   use Application
 
   alias Pubsub.Client
+  alias Pubsub.Client.Subscriber.Stream
   alias GRPC.RPCError
 
   @typedoc "WIP: What is this?"
@@ -28,6 +29,13 @@ defmodule Pubsub do
     children = [worker(Client, [])]
     opts = [strategy: :one_for_one, name: __MODULE__]
     Supervisor.start_link(children, opts)
+  end
+
+  @doc """
+  """
+  @spec client() :: Client.t
+  def client do
+    GenServer.call(Pubsub.Client, {:client})
   end
 
   @doc """
@@ -202,5 +210,18 @@ defmodule Pubsub do
   @spec acknowledge(ack_ids :: [String.t], subscription_name :: String.t) :: :ok | error
   def acknowledge(ack_ids, subscription) do
     GenServer.call(Pubsub.Client, {:acknowledge, ack_ids, subscription})
+  end
+
+  @doc """
+  Starts a streaming pull for the given subscription
+
+  ## Examples
+
+      Pubsub.open_stream("foo-subscription")
+      #=> %Stream{}
+  """
+  @spec open_stream(subscription_name :: String.t) :: Stream.t
+  def open_stream(subscription) do
+    GenServer.call(Pubsub.Client, {:open_stream, subscription})
   end
 end

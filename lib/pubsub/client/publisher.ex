@@ -18,7 +18,7 @@ defmodule Pubsub.Client.Publisher do
   def create_topic(client, name) do
     topic = Topic.new(name: Util.full_topic(client.project, name))
     client.channel
-    |> Stub.create_topic(topic, client.request_opts)
+    |> Stub.create_topic(topic, Client.request_opts(client))
     |> case do
       {:error, _rpc_error} = error -> error
       {:ok, %Topic{}} -> :ok
@@ -29,7 +29,7 @@ defmodule Pubsub.Client.Publisher do
   def delete_topic(client, name) do
     request = DeleteTopicRequest.new(name: Util.full_topic(client.project, name))
     client.channel
-    |> Stub.delete_topic(request, client.request_opts)
+    |> Stub.delete_topic(request, Client.request_opts(client))
     |> case do
       {:error, _rpc_error} = error -> error
       {:ok, %Empty{}} -> :ok
@@ -45,7 +45,7 @@ defmodule Pubsub.Client.Publisher do
                                     page_size: max_topics,
                                     page_token: cursor)
     client.channel
-    |> Stub.list_topics(request, client.request_opts)
+    |> Stub.list_topics(request, Client.request_opts(client))
     |> case do
       {:error, _rpc_error} = error ->
         error
@@ -66,7 +66,7 @@ defmodule Pubsub.Client.Publisher do
                                  messages: messages,
                                  attributes: %{})
     client.channel
-    |> Stub.publish(request, client.request_opts)
+    |> Stub.publish(request, Client.request_opts(client))
     |> case do
       {:error, _rpc_error} = error -> error
       {:ok, %PublishResponse{message_ids: ids}} -> {:ok, ids}

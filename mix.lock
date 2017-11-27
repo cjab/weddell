@@ -1,4 +1,5 @@
-%{"certifi": {:hex, :certifi, "2.0.0", "a0c0e475107135f76b8c1d5bc7efb33cd3815cb3cf3dea7aefdd174dabead064", [], [], "hexpm"},
+%{"apex": {:hex, :apex, "1.2.0", "2da5035ef5fc59da2c24187a880b1b6d38b6b67c19b89a6265f5986ff0e85b1f", [], [], "hexpm"},
+  "certifi": {:hex, :certifi, "2.0.0", "a0c0e475107135f76b8c1d5bc7efb33cd3815cb3cf3dea7aefdd174dabead064", [], [], "hexpm"},
   "chatterbox": {:git, "https://github.com/tony612/chatterbox.git", "c7c2ab4c3e74618cfa78fdbf6444fac3952d194b", [branch: "my-fix"]},
   "cowboy": {:git, "https://github.com/tony612/cowboy.git", "d047a94f7c2f94118f924724a62ce90f1cac4282", [branch: "my-fix"]},
   "cowlib": {:git, "https://github.com/ninenines/cowlib", "11e07d3c2b164d06ad35188d83ad70e7501396db", [ref: "2.0.0-rc.1"]},

@@ -2,27 +2,29 @@ defmodule Pubsub.Client.Subscriber.Stream do
   alias Pubsub.Client
   alias Pubsub.Client.Util
   alias Google_Pubsub_V1.Subscriber.Stub
-  alias Google_Pubsub_V1.Subscriber.StreamingPullRequest
-  alias Google_Pubsub_V1.Subscriber.StreamingPullResponse
+  alias Google_Pubsub_V1.StreamingPullRequest
+  alias Google_Pubsub_V1.StreamingPullResponse
 
   @typedoc "A pubsub subscriber stream"
-  @opaque t :: %__MODULE{client: Pubsub.Client.t,
-                         grpc_stream: GRPC.Client.Stream.t}
-  defstruct [:client, :grpc_stream]
+  @opaque t :: %__MODULE__{client: Pubsub.Client.t,
+                           subscription: String.t,
+                           grpc_stream: GRPC.Client.Stream.t}
+  defstruct [:client, :subscription, :grpc_stream]
 
   @default_ack_deadline 10
 
-  @spec open(Client.t) :: t
-  def open(client) do
+  @spec open(Client.t, subscription :: String.t) :: t
+  def open(client, subscription) do
     %__MODULE__{client: client,
-                grpc_stream: Stub.streaming_pull(client.channel)}
+                subscription: subscription,
+                grpc_stream: Stub.streaming_pull(client.channel, Client.request_opts(client))}
   end
 
   @spec close(t) :: :ok
   def close(stream) do
     request =
       StreamingPullRequest.new(
-        subscription: Util.full_subscription(stream.client.project, subscription))
+        subscription: Util.full_subscription(stream.client.project, stream.subscription))
     GRPC.Stub.stream_send(stream.grpc_stream, request, end_stream: true)
   end
 
@@ -37,17 +39,17 @@ defmodule Pubsub.Client.Subscriber.Stream do
   @typedoc "Options used when writing to a stream"
   @type send_opts :: [send_opt]
 
-  @spec send(stream :: t, subscription :: String.t, send_opts) :: :ok
-  def send(stream, subscription, opts \\ [])  do
+  @spec send(stream :: t, send_opts) :: :ok
+  def send(stream, opts \\ [])  do
     {deadline_ack_ids, deadline_seconds} =
       opts
       |> Keyword.get(:modify_deadline, [])
       |> Enum.reduce({[], []}, fn ({id, deadline}, {ids, deadlines}) ->
         {[id | ids], [deadline | deadlines]}
-      end
+      end)
     request =
       StreamingPullRequest.new(
-        subscription: Util.full_subscription(stream.client.project, subscription),
+        subscription: Util.full_subscription(stream.client.project, stream.subscription),
         ack_ids: Keyword.get(opts, :ack, []),
         modify_deadline_ack_ids: deadline_ack_ids,
         modify_deadline_seconds: deadline_seconds,

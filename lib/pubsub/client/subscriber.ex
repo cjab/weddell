@@ -32,7 +32,7 @@ defmodule Pubsub.Client.Subscriber do
         push_config: push_config,
         ack_deadline_seconds: ack_deadline)
     client.channel
-    |> Stub.create_subscription(subscription, client.request_opts)
+    |> Stub.create_subscription(subscription, Client.request_opts(client))
     |> case do
       {:error, _rpc_error} = error -> error
       {:ok, _subscription} -> :ok
@@ -45,7 +45,7 @@ defmodule Pubsub.Client.Subscriber do
       DeleteSubscriptionRequest.new(
         subscription: Util.full_subscription(client.project, name))
     client.channel
-    |> Stub.delete_subscription(request, client.request_opts)
+    |> Stub.delete_subscription(request, Client.request_opts(client))
     |> case do
       {:error, _rpc_error} = error -> error
       {:ok, %Empty{}} -> :ok
@@ -63,7 +63,7 @@ defmodule Pubsub.Client.Subscriber do
                                     page_size: max_topics,
                                     page_token: cursor)
     client.channel
-    |> Stub.list_subscriptions(request, client.request_opts)
+    |> Stub.list_subscriptions(request, Client.request_opts(client))
     |> case do
       {:error, _rpc_error} = error -> error
       {:ok, %ListSubscriptionsResponse{next_page_token: ""} = response} ->
@@ -82,7 +82,7 @@ defmodule Pubsub.Client.Subscriber do
         return_immediately: Keyword.get(opts, :return_immediately, true),
         max_messages: Keyword.get(opts, :max_messages, 1))
     client.channel
-    |> Stub.pull(request, client.request_opts)
+    |> Stub.pull(request, Client.request_opts(client))
     |> case do
       {:error, _rpc_error} = error ->
         error
@@ -99,7 +99,7 @@ defmodule Pubsub.Client.Subscriber do
         subscription: Util.full_subscription(client.project, subscription),
         ack_ids: ack_ids)
     client.channel
-    |> Stub.acknowledge(request, client.request_opts)
+    |> Stub.acknowledge(request, Client.request_opts(client))
     |> case do
       {:error, _rpc_error} = error -> error
       {:ok, %Empty{}} -> :ok

@@ -7,6 +7,7 @@ defmodule Pubsub.Client do
   alias GRPC.Stub
   alias Pubsub.Client.Publisher
   alias Pubsub.Client.Subscriber
+  alias Pubsub.Client.Subscriber.Stream
 
   @default_host "pubsub.googleapis.com"
   @default_port 443
@@ -42,7 +43,7 @@ defmodule Pubsub.Client do
   @typedoc "A cursor used for pagination of lists"
   @type cursor :: String.t
 
-  defstruct [:channel, :project, :request_opts]
+  defstruct [:channel, :project]
 
   @doc """
   Start the client process and connect to Pubsub using settings in the application config.
@@ -103,12 +104,15 @@ defmodule Pubsub.Client do
     {:ok, channel} =
       Stub.connect("#{host}:#{port}", cred: cred)
     {:ok, %__MODULE__{channel: channel,
-                      project: project,
-                      request_opts: request_opts()}}
+                      project: project}}
+  end
+
+  @spec request_opts(client :: t) :: Keyword.t
+  def request_opts(client) do
+    [metadata: auth_header(), content_type: "application/grpc"]
   end
 
   def handle_call(request, _, client) do
-    client = %{client | request_opts: request_opts()}
     case request do
       {:create_topic, name} ->
         {:reply, Publisher.create_topic(client, name), client}
@@ -128,15 +132,13 @@ defmodule Pubsub.Client do
         {:reply, Subscriber.pull(client, subscription, opts), client}
       {:acknowledge, ack_ids, subscription} ->
         {:reply, Subscriber.acknowledge(client, ack_ids, subscription), client}
+      {:client} ->
+        {:reply, client, client}
     end
   end
 
   def handle_info(_, client) do
     {:noreply, client}
-  end
-
-  defp request_opts do
-    [metadata: auth_header(), content_type: "application/grpc"]
   end
 
   defp auth_header do
