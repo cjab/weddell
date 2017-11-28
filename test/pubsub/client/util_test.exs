@@ -19,4 +19,11 @@ defmodule Pubsub.Client.UtilTest do
         "projects/#{@project}/topics/#{@topic}"
     end
   end
+
+  describe "Util.full_project\2" do
+    test "builds a full project string" do
+      assert Util.full_project(@project) ==
+        "projects/#{@project}"
+    end
+  end
 end

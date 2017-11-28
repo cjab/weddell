@@ -49,7 +49,7 @@ defmodule Pubsub.Client.Subscriber do
       DeleteSubscriptionRequest.new(
         subscription: Util.full_subscription(client.project, name))
     client.channel
-    |> Stub.delete_subscription(request, Client.request_opts(client))
+    |> stub_module().delete_subscription(request, Client.request_opts(client))
     |> case do
       {:error, _rpc_error} = error -> error
       {:ok, %Empty{}} -> :ok
@@ -67,10 +67,10 @@ defmodule Pubsub.Client.Subscriber do
                                     page_size: max_topics,
                                     page_token: cursor)
     client.channel
-    |> Stub.list_subscriptions(request, Client.request_opts(client))
+    |> stub_module().list_subscriptions(request, Client.request_opts(client))
     |> case do
       {:error, _rpc_error} = error -> error
-      {:ok, %ListSubscriptionsResponse{next_page_token: ""} = response} ->
+      {:ok, %ListSubscriptionsResponse{next_page_token: nil} = response} ->
         details = Enum.map(response.subscriptions, &(SubscriptionDetails.new(&1)))
         {:ok, details}
       {:ok, %ListSubscriptionsResponse{next_page_token: next_cursor} = response} ->
