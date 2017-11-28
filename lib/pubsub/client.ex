@@ -5,6 +5,7 @@ defmodule Pubsub.Client do
   use GenServer
 
   alias GRPC.Stub
+  alias GRPC.RPCError
   alias Pubsub.Client.Publisher
   alias Pubsub.Client.Subscriber
   alias Pubsub.Client.Subscriber.Stream
@@ -13,7 +14,10 @@ defmodule Pubsub.Client do
   @default_port 443
 
   @typedoc "A pubsub client"
-  @opaque t :: {GRPC.Channel.t, project :: String.t}
+  @opaque t :: %__MODULE__{channel: GRPC.Channel.t,
+                           project: String.t}
+
+  defstruct [:channel, :project]
 
   @typedoc "An RPC error"
   @type error :: {:error, RPCError.t}
@@ -42,8 +46,6 @@ defmodule Pubsub.Client do
 
   @typedoc "A cursor used for pagination of lists"
   @type cursor :: String.t
-
-  defstruct [:channel, :project]
 
   @doc """
   Start the client process and connect to Pubsub using settings in the application config.

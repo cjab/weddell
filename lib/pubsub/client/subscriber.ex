@@ -16,6 +16,10 @@ defmodule Pubsub.Client.Subscriber do
 
   @default_list_max 50
 
+  defp stub_module do
+    Application.get_env(:pubsub, :subscriber_stub, Google_Pubsub_V1.Subscriber.Stub)
+  end
+
   @spec create_subscription(Client.t, name :: String.t,
                             topic :: String.t,
                             Client.subscription_options) :: :ok | Client.error
@@ -32,7 +36,7 @@ defmodule Pubsub.Client.Subscriber do
         push_config: push_config,
         ack_deadline_seconds: ack_deadline)
     client.channel
-    |> Stub.create_subscription(subscription, Client.request_opts(client))
+    |> stub_module().create_subscription(subscription, Client.request_opts(client))
     |> case do
       {:error, _rpc_error} = error -> error
       {:ok, _subscription} -> :ok
