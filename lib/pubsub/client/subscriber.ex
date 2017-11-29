@@ -1,6 +1,7 @@
 defmodule Pubsub.Client.Subscriber do
   @moduledoc false
   alias Pubsub.Client
+  alias Pubsub.Message
   alias Google_Protobuf.Empty
   alias Google_Pubsub_V1.PushConfig
   alias Google_Pubsub_V1.PullRequest
@@ -10,7 +11,6 @@ defmodule Pubsub.Client.Subscriber do
   alias Google_Pubsub_V1.ListSubscriptionsRequest
   alias Google_Pubsub_V1.ListSubscriptionsResponse
   alias Google_Pubsub_V1.DeleteSubscriptionRequest
-  alias Google_Pubsub_V1.Subscriber.Stub
   alias Pubsub.Client.Util
   alias Pubsub.SubscriptionDetails
 
@@ -79,6 +79,8 @@ defmodule Pubsub.Client.Subscriber do
     end
   end
 
+  @spec pull(Client.t, subscription_name :: String.t, Client.pull_options) ::
+    {:ok, [Message.t]} | Client.error
   def pull(client, subscription, opts \\ []) do
     request =
       PullRequest.new(
@@ -86,15 +88,17 @@ defmodule Pubsub.Client.Subscriber do
         return_immediately: Keyword.get(opts, :return_immediately, true),
         max_messages: Keyword.get(opts, :max_messages, 1))
     client.channel
-    |> Stub.pull(request, Client.request_opts(client))
+    |> stub_module().pull(request, Client.request_opts(client))
     |> case do
       {:error, _rpc_error} = error ->
         error
       {:ok, %PullResponse{received_messages: messages}} ->
-        {:ok, messages}
+        {:ok, Enum.map(messages, &Message.new/1)}
     end
   end
 
+  @spec acknowledge(Client.t, ack_ids :: [String.t] | ack_id :: String.t,
+                    subscription_name :: String.t) :: {:ok, [Message.t]} | Client.error
   def acknowledge(client, ack_id, subscription) when not is_list(ack_id),
     do: acknowledge(client, [ack_id], subscription)
   def acknowledge(client, ack_ids, subscription) do
@@ -103,7 +107,7 @@ defmodule Pubsub.Client.Subscriber do
         subscription: Util.full_subscription(client.project, subscription),
         ack_ids: ack_ids)
     client.channel
-    |> Stub.acknowledge(request, Client.request_opts(client))
+    |> stub_module().acknowledge(request, Client.request_opts(client))
     |> case do
       {:error, _rpc_error} = error -> error
       {:ok, %Empty{}} -> :ok

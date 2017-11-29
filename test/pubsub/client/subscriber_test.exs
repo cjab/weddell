@@ -5,18 +5,20 @@ defmodule Pubsub.Client.SubscriberTest do
   alias Google_Protobuf.Empty
   alias Google_Pubsub_V1.ListSubscriptionsResponse
   alias Google_Pubsub_V1.Subscription
+  alias Google_Pubsub_V1.PubsubMessage
+  alias Google_Pubsub_V1.PullResponse
   alias Pubsub.Client
   alias Pubsub.Client.Subscriber
   alias Pubsub.Client.Util
   alias Pubsub.SubscriptionDetails
   alias Pubsub.SubscriberStubMock
+  alias Pubsub.Message
 
   Application.put_env(:pubsub, :subscriber_stub, SubscriberStubMock)
 
   @project "test-project"
   @topic "test-topic"
   @subscription "test-subscription"
-
 
   describe "Subscriber.create_subscription/4" do
     setup [:setup_client, :stub_create_subscription, :verify_on_exit!]
@@ -126,6 +128,79 @@ defmodule Pubsub.Client.SubscriberTest do
     end
   end
 
+  describe "Subscriber.pull/3" do
+    setup [:setup_client, :stub_pull, :verify_on_exit!]
+
+    test "successfully pulls messages", %{client: client} do
+      subscription = Util.full_subscription(client.project, @subscription)
+      SubscriberStubMock
+      |> expect(:pull, fn
+        (_, %{subscription: ^subscription}, _) ->
+          {:ok, %PullResponse{received_messages: [%PubsubMessage{}, %PubsubMessage{}]}}
+      end)
+      assert {:ok, [%Message{}, %Message{}]} ==
+        Subscriber.pull(client, @subscription)
+    end
+
+    test "successfully pulls messages with options", %{client: client} do
+      SubscriberStubMock
+      |> expect(:pull, fn
+        (_, %{return_immediately: false, max_messages: 50}, _) ->
+          {:ok, %PullResponse{received_messages: [%PubsubMessage{}, %PubsubMessage{}]}}
+      end)
+      assert {:ok, [%Message{}, %Message{}]} ==
+        Subscriber.pull(client, @subscription, return_immediately: false, max_messages: 50)
+    end
+
+    test "error pulling messages", %{client: client} do
+      error = %RPCError{}
+      SubscriberStubMock
+      |> expect(:pull, fn _, _, _ ->
+          {:error, error}
+      end)
+      assert {:error, error} ==
+        Subscriber.pull(client, @subscription)
+    end
+  end
+
+  describe "Subscriber.acknowledge/3" do
+    setup [:setup_client, :stub_acknowledge, :verify_on_exit!]
+
+    test "successfully acks messages", %{client: client} do
+      subscription = Util.full_subscription(client.project, @subscription)
+      ack_ids = ["ack-1", "ack-2"]
+      SubscriberStubMock
+      |> expect(:acknowledge, fn
+        (_, %{subscription: ^subscription, ack_ids: ^ack_ids}, _) ->
+          {:ok, %Empty{}}
+      end)
+      assert :ok ==
+        Subscriber.acknowledge(client, ack_ids, @subscription)
+    end
+
+    test "successfully acks single message", %{client: client} do
+      subscription = Util.full_subscription(client.project, @subscription)
+      ack_id = "ack-1"
+      SubscriberStubMock
+      |> expect(:acknowledge, fn
+        (_, %{subscription: ^subscription, ack_ids: [^ack_id]}, _) ->
+          {:ok, %Empty{}}
+      end)
+      assert :ok ==
+        Subscriber.acknowledge(client, ack_id, @subscription)
+    end
+
+    test "error acking messages", %{client: client} do
+      error = %RPCError{}
+      SubscriberStubMock
+      |> expect(:acknowledge, fn _, _, _ ->
+          {:error, error}
+      end)
+      assert {:error, error} ==
+        Subscriber.acknowledge(client, "ack-1", @subscription)
+    end
+  end
+
   defp setup_client(_) do
     [client: %Client{project: @project}]
   end
@@ -149,6 +224,22 @@ defmodule Pubsub.Client.SubscriberTest do
   defp stub_list_subscriptions(_) do
     SubscriberStubMock
     |> stub(:list_subscriptions, fn _, _, _ ->
+      {:ok, %Empty{}}
+    end)
+    :ok
+  end
+
+  defp stub_pull(_) do
+    SubscriberStubMock
+    |> stub(:pull, fn _, _, _ ->
+      {:ok, []}
+    end)
+    :ok
+  end
+
+  defp stub_acknowledge(_) do
+    SubscriberStubMock
+    |> stub(:acknowledge, fn _, _, _ ->
       {:ok, %Empty{}}
     end)
     :ok

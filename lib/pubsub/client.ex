@@ -8,7 +8,6 @@ defmodule Pubsub.Client do
   alias GRPC.RPCError
   alias Pubsub.Client.Publisher
   alias Pubsub.Client.Subscriber
-  alias Pubsub.Client.Subscriber.Stream
 
   @default_host "pubsub.googleapis.com"
   @default_port 443
@@ -43,6 +42,14 @@ defmodule Pubsub.Client do
 
   @typedoc "Option values used when retrieving lists"
   @type list_options :: [list_option]
+
+  @typedoc "Option values used when pulling messages"
+  @type pull_option :: {:return_immediately, boolean} |
+                       {:max_messages, pos_integer}
+
+  @typedoc "Options used when pulling messages"
+  @type pull_options :: [pull_option]
+
 
   @typedoc "A cursor used for pagination of lists"
   @type cursor :: String.t
@@ -110,7 +117,7 @@ defmodule Pubsub.Client do
   end
 
   @spec request_opts(client :: t) :: Keyword.t
-  def request_opts(client) do
+  def request_opts(_client) do
     [metadata: auth_header(), content_type: "application/grpc"]
   end
 

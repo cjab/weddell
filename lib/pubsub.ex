@@ -14,14 +14,6 @@ defmodule Pubsub do
   @typedoc "An RPC error"
   @type error :: {:error, RPCError.t}
 
-  @typedoc "Option values used when pulling messages"
-  @type pull_option :: {:return_immediately, boolean} |
-                       {:max_messages, pos_integer}
-
-  @typedoc "Options used when pulling messages"
-  @type pull_options :: [pull_option]
-
-
   @doc """
   """
   def start(_type, _args) do
@@ -191,7 +183,7 @@ defmodule Pubsub do
     * `:max_messages` - The maximum number of messages to be returned,
       it may be fewer. _(default: 10)_
   """
-  @spec pull(subscription_name :: String.t, pull_options) ::
+  @spec pull(subscription_name :: String.t, Client.pull_options) ::
     {:ok, messages :: [message]} | error
   def pull(subscription, opts \\ []) do
     GenServer.call(Pubsub.Client, {:pull, subscription, opts})
