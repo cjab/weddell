@@ -117,7 +117,7 @@ defmodule Pubsub.Client.SubscriberTest do
         Subscriber.subscriptions(client, cursor: cursor, max: max)
     end
 
-    test "error deleting a subscription", %{client: client} do
+    test "error listing subscriptions", %{client: client} do
       error = %RPCError{}
       SubscriberStubMock
       |> expect(:list_subscriptions, fn _, _, _ ->

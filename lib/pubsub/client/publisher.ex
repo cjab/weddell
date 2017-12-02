@@ -8,17 +8,21 @@ defmodule Pubsub.Client.Publisher do
   alias Google_Pubsub_V1.ListTopicsRequest
   alias Google_Pubsub_V1.ListTopicsResponse
   alias Google_Pubsub_V1.DeleteTopicRequest
-  alias Google_Pubsub_V1.Publisher.Stub
   alias Pubsub.Client
   alias Pubsub.Client.Util
+  alias Pubsub.TopicDetails
 
   @default_list_max 50
+
+  defp stub_module do
+    Application.get_env(:pubsub, :publisher_stub, Google_Pubsub_V1.Publisher.Stub)
+  end
 
   @spec create_topic(Client.t, name :: String.t) :: :ok | Client.error
   def create_topic(client, name) do
     topic = Topic.new(name: Util.full_topic(client.project, name))
     client.channel
-    |> Stub.create_topic(topic, Client.request_opts(client))
+    |> stub_module().create_topic(topic, Client.request_opts(client))
     |> case do
       {:error, _rpc_error} = error -> error
       {:ok, %Topic{}} -> :ok
@@ -27,9 +31,9 @@ defmodule Pubsub.Client.Publisher do
 
   @spec delete_topic(Client.t, name :: String.t) :: :ok | Client.error
   def delete_topic(client, name) do
-    request = DeleteTopicRequest.new(name: Util.full_topic(client.project, name))
+    request = DeleteTopicRequest.new(topic: Util.full_topic(client.project, name))
     client.channel
-    |> Stub.delete_topic(request, Client.request_opts(client))
+    |> stub_module().delete_topic(request, Client.request_opts(client))
     |> case do
       {:error, _rpc_error} = error -> error
       {:ok, %Empty{}} -> :ok
@@ -45,14 +49,14 @@ defmodule Pubsub.Client.Publisher do
                                     page_size: max_topics,
                                     page_token: cursor)
     client.channel
-    |> Stub.list_topics(request, Client.request_opts(client))
+    |> stub_module().list_topics(request, Client.request_opts(client))
     |> case do
       {:error, _rpc_error} = error ->
         error
-      {:ok, %ListTopicsResponse{topics: topics, next_page_token: ""}} ->
-        {:ok, Enum.map(topics, &(&1.name))}
+      {:ok, %ListTopicsResponse{topics: topics, next_page_token: nil}} ->
+        {:ok, Enum.map(topics, &TopicDetails.new/1)}
       {:ok, %ListTopicsResponse{topics: topics, next_page_token: next_cursor}} ->
-        {:ok, Enum.map(topics, &(&1.name)), next_cursor}
+        {:ok, Enum.map(topics, &TopicDetails.new/1), next_cursor}
     end
   end
 
@@ -66,7 +70,7 @@ defmodule Pubsub.Client.Publisher do
                                  messages: messages,
                                  attributes: %{})
     client.channel
-    |> Stub.publish(request, Client.request_opts(client))
+    |> stub_module().publish(request, Client.request_opts(client))
     |> case do
       {:error, _rpc_error} = error -> error
       {:ok, %PublishResponse{message_ids: ids}} -> {:ok, ids}
