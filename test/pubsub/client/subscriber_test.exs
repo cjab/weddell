@@ -89,20 +89,24 @@ defmodule Pubsub.Client.SubscriberTest do
 
     test "list all subscriptions without paging", %{client: client} do
       project = Util.full_project(client.project)
-      subscription = %Subscription{push_config: %{push_endpoint: nil, attributes: nil}}
+      subscription = %Subscription{push_config: %{push_endpoint: nil, attributes: nil},
+                                   name: Util.full_subscription(@project, @subscription),
+                                   topic: Util.full_topic(@project, @topic)}
       subscriptions = [subscription, subscription]
       SubscriberStubMock
       |> expect(:list_subscriptions, fn
         (_, %{project: ^project, page_size: 50}, _) ->
           {:ok, %ListSubscriptionsResponse{subscriptions: subscriptions}}
       end)
-      assert {:ok, [%SubscriptionDetails{}, %SubscriptionDetails{}]} ==
+      assert {:ok, [%SubscriptionDetails{}, %SubscriptionDetails{}]} =
         Subscriber.subscriptions(client)
     end
 
     test "list all subscriptions with paging", %{client: client} do
       project = Util.full_project(client.project)
-      subscription = %Subscription{push_config: %{push_endpoint: nil, attributes: nil}}
+      subscription = %Subscription{push_config: %{push_endpoint: nil, attributes: nil},
+                                   name: Util.full_subscription(@project, @subscription),
+                                   topic: Util.full_topic(@project, @topic)}
       subscriptions = [subscription, subscription]
       cursor = "page-token"
       max = 100
@@ -113,7 +117,7 @@ defmodule Pubsub.Client.SubscriberTest do
             %ListSubscriptionsResponse{subscriptions: subscriptions,
                                        next_page_token: cursor}}
       end)
-      assert {:ok, [%SubscriptionDetails{}, %SubscriptionDetails{}], cursor} ==
+      assert {:ok, [%SubscriptionDetails{}, %SubscriptionDetails{}], ^cursor} =
         Subscriber.subscriptions(client, cursor: cursor, max: max)
     end
 
