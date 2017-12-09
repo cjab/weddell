@@ -27,11 +27,12 @@ defmodule Pubsub.Mixfile do
   defp deps do
     [
       {:ex_doc, "~> 0.16", only: :dev, runtime: false},
-      {:protobuf, "~> 0.3"},
+      {:protobuf, "~> 0.5"},
       {:grpc, path: "../grpc-elixir"},
       {:goth, "~> 0.7"},
       {:apex, "~> 1.2", only: :dev},
       {:mox, "~> 0.3", only: :test},
+      {:certifi, "~> 2.0"},
     ]
   end
 end

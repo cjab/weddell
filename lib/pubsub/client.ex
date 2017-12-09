@@ -24,7 +24,8 @@ defmodule Pubsub.Client do
   @typedoc "Option value used when connecting a client"
   @type connect_option :: {:host, String.t} |
                           {:port, pos_integer} |
-                          {:ca_path, String.t}
+                          {:scheme, :http | :https} |
+                          {:ssl, [:ssl.ssl_option]}
 
   @typedoc "Option values used when connecting clients"
   @type connect_options :: [connect_option]
@@ -62,18 +63,21 @@ defmodule Pubsub.Client do
   In your application config:
 
       config :pubsub,
+        scheme: :http,
         host: "localhost",
         port: 8085,
-        ca_path: "/usr/local/etc/openssl/cert.pem",
         project: "test-project"
 
   ## Settings
 
     * `project` - The __required__ Google Cloud project that will be used for all calls made by this client.
+    * `scheme` - The scheme to use when connecting to the pubsub service. _(default: :https)_
     * `host` - The pubsub host to connect to. This defaults to Google's pubsub service but
       is useful for connecting to a local pubsub emulator _(default: "pubsub.googleapis.com")_
     * `port` - The port on which to connect to the host. _(default: 443)_
-    * `ca_path` - The path to a pem formatted ca cert chain. _(default: nil)_
+    * `ssl` - SSL settings to be used when connecting with the `:https` scheme. See `ssl_option()`
+      in the [ssl documentation] (http://erlang.org/doc/man/ssl.html).
+      _(default: [:cacerts: :certifi.cacerts()])_
   """
   def start_link do
     GenServer.start_link(__MODULE__, :ok, name: __MODULE__)
@@ -81,9 +85,7 @@ defmodule Pubsub.Client do
 
   def init(:ok) do
     connect(Application.get_env(:pubsub, :project),
-      ca_path: Application.get_env(:pubsub, :ca_path),
-      host: Application.get_env(:pubsub, :host),
-      port: Application.get_env(:pubsub, :port))
+            Application.get_all_env(:pubsub))
   end
 
   @doc """
@@ -92,24 +94,29 @@ defmodule Pubsub.Client do
   ## Example
 
       Pubsub.Client.connect("project-name",
+                            scheme: :https,
                             host: "pubsub.googleapis.com",
                             port: 443,
-                            ca_path: "/usr/local/etc/openssl/cert.pem")
+                            ssl: [cacerts: :certifi.cacerts()])
       #=> {:ok, client}
 
   ## Options
 
+    * `scheme` - The scheme to use when connecting to the pubsub service. _(default: :https)_
     * `host` - The pubsub host to connect to. This defaults to Google's pubsub service but
       is useful for connecting to a local pubsub emulator _(default: "pubsub.googleapis.com")_
     * `port` - The port on which to connect to the host. _(default: 443)_
-    * `ca_path` - The path to a pem formatted ca cert chain. _(default: nil)_
+    * `ssl` - SSL settings to be used when connecting with the `:https` scheme. See `ssl_option()`
+      in the [ssl documentation](http://erlang.org/doc/man/ssl.html).
+      _(default: [cacerts: :certifi.cacerts()])_
   """
   @spec connect(project :: String.t, opts :: connect_options) :: {:ok, t}
   def connect(project, opts \\ []) do
-    ca_path = Keyword.get(opts, :ca_path)
-    cred = if ca_path, do: GRPC.Credential.client_tls(ca_path), else: nil
-    host = Keyword.get(opts, :host) || @default_host
-    port = Keyword.get(opts, :port) || @default_port
+    scheme = Keyword.get(opts, :scheme, :https)
+    ssl = ssl_opts(opts)
+    cred = if scheme == :https, do: GRPC.Credential.new(ssl: ssl), else: nil
+    host = Keyword.get(opts, :host, @default_host)
+    port = Keyword.get(opts, :port, @default_port)
     {:ok, channel} =
       Stub.connect("#{host}:#{port}", cred: cred)
     {:ok, %__MODULE__{channel: channel,
@@ -154,5 +161,12 @@ defmodule Pubsub.Client do
     {:ok, %{token: token, type: token_type}} =
       Goth.Token.for_scope("https://www.googleapis.com/auth/pubsub")
     %{"authorization" => "#{token_type} #{token}"}
+  end
+
+  defp ssl_opts(opts) do
+    default_opts = [cacerts: :certifi.cacerts()]
+    ssl_opts = Keyword.get(opts, :ssl, [])
+    default_opts
+    |> Keyword.merge(ssl_opts)
   end
 end

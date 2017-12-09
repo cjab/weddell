@@ -1,8 +1,8 @@
 use Mix.Config
 config :pubsub,
-# host: "localhost",
-# port: 4343,
-  ca_path: "/usr/local/etc/openssl/cert.pem",
+  scheme: :http,
+  host: "localhost",
+  port: 8085,
   project: "elixir-pubsub"
 
 config :goth,
