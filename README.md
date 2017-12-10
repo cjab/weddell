@@ -1,21 +1,68 @@
-# Pubsub
+# Weddell
 
-**TODO: Add description**
+Weddell is an Elixir client for [Google Pubsub](https://cloud.google.com/pubsub/).
+
+Documentation can be found at: [https://hex.pm/weddell](https://hex.pm/weddell).
+Code can be found at: [https://github.com/cjab/weddell](https://github.com/cjab/weddell).
 
 ## Installation
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `pubsub` to your list of dependencies in `mix.exs`:
 
-```elixir
+1) Add weddell to your list of dependencies in `mix.exs`:
+
+```
 def deps do
-  [
-    {:pubsub, "~> 0.1.0"}
-  ]
+  [{:weddell, "~> 0.1.0"}]
 end
 ```
 
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at [https://hexdocs.pm/pubsub](https://hexdocs.pm/pubsub).
+2) Configure Goth with your GCP service account credentials:
 
+```
+config :goth,
+  json: {:system, "GCP_CREDENTIALS_JSON"}
+```
+
+## Getting Started
+
+### Creating a consumer
+
+```
+# In your application code
+defmoudle MyApp.Consumer do
+  use Weddell.Consumer
+
+  def handle_messages(messages) do
+    # Process messages
+    :ack
+  end
+end
+
+defmodule MyApp do
+  use Application
+
+  def start(_type, _args) do
+    import Supervisor.Spec
+
+    children = [
+      {MyApp.Consumer, "subscription-name"}
+    ]
+
+    opts = [strategy: :one_for_one, name: MyApp.Supervisor]
+    Supervisor.start_link(children, opts)
+  end
+end
+```
+
+### Publishing a message
+
+```
+Weddell.publish(data, "topic-name")
+```
+
+## Alternatives
+
+Weddell uses Pubsub's GRPC API which is still in beta. It also optionally
+makes use of streaming APIs that are considered experimental. If the
+beta/experimental status of Weddell worries you [Kane](https://github.com/peburrows/kane)
+may be a better choice. It uses the more mature Pubsub REST API.
