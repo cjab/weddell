@@ -5,7 +5,7 @@ defmodule Pubsub.Client.SubscriberTest do
   alias Google_Protobuf.Empty
   alias Google_Pubsub_V1.ListSubscriptionsResponse
   alias Google_Pubsub_V1.Subscription
-  alias Google_Pubsub_V1.PubsubMessage
+  alias Google_Pubsub_V1.ReceivedMessage
   alias Google_Pubsub_V1.PullResponse
   alias Pubsub.Client
   alias Pubsub.Client.Subscriber
@@ -137,22 +137,26 @@ defmodule Pubsub.Client.SubscriberTest do
 
     test "successfully pulls messages", %{client: client} do
       subscription = Util.full_subscription(client.project, @subscription)
+      message = %{message_id: "1", publish_time: %{seconds: 1}, attributes: %{}, data: ""}
       SubscriberStubMock
       |> expect(:pull, fn
         (_, %{subscription: ^subscription}, _) ->
-          {:ok, %PullResponse{received_messages: [%PubsubMessage{}, %PubsubMessage{}]}}
+          {:ok, %PullResponse{received_messages: [%ReceivedMessage{message: message},
+                                                  %ReceivedMessage{message: message}]}}
       end)
-      assert {:ok, [%Message{}, %Message{}]} ==
+      assert {:ok, [%Message{}, %Message{}]} =
         Subscriber.pull(client, @subscription)
     end
 
     test "successfully pulls messages with options", %{client: client} do
+      message = %{message_id: "1", publish_time: %{seconds: 1}, attributes: %{}, data: ""}
       SubscriberStubMock
       |> expect(:pull, fn
         (_, %{return_immediately: false, max_messages: 50}, _) ->
-          {:ok, %PullResponse{received_messages: [%PubsubMessage{}, %PubsubMessage{}]}}
+          {:ok, %PullResponse{received_messages: [%ReceivedMessage{message: message},
+                                                  %ReceivedMessage{message: message}]}}
       end)
-      assert {:ok, [%Message{}, %Message{}]} ==
+      assert {:ok, [%Message{}, %Message{}]} =
         Subscriber.pull(client, @subscription, return_immediately: false, max_messages: 50)
     end
 

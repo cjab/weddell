@@ -1,9 +1,20 @@
 defmodule Pubsub.Consumer do
   alias Pubsub.Client
+  alias Pubsub.Message
   alias Pubsub.Client.Subscriber
 
-  @callback handle_message(message :: Message.t) ::
-    :ack | :retry | {:delay, deadline :: pos_integer}
+  @typedoc "A list delay tuple"
+  @type message_delay :: {Message.t, pos_integer}
+
+  @typedoc "Message handler response option"
+  @type response_option :: {:ack, [Message.t]} |
+                           {:delay, [message_delay]}
+
+  @typedoc "Option values used when connecting clients"
+  @type response_options:: [response_option]
+
+  @callback handle_messages(messages :: [Message.t]) ::
+    {:ok, response_options} | :error
 
   defmacro __using__(_opts) do
     quote do
@@ -36,21 +47,22 @@ defmodule Pubsub.Consumer do
         stream
         |> Subscriber.Stream.recv()
         |> Enum.each(fn (%{received_messages: messages}) ->
-          dispatch(messages)
+          messages
+          |> Enum.map(&Message.new/1)
+          |> dispatch()
         end)
         {:stop, :stream_closed, stream}
       end
 
-      defp dispatch(messages) when is_list(messages),
-        do: Enum.each(messages, &dispatch/1)
-      defp dispatch(%{ack_id: ack_id, message: message}) do
-        case handle_message(message) do
-          :ack ->
-            IO.inspect("ACKED: #{ack_id}")
-          :retry ->
-            IO.inspect("RETRY: #{ack_id}")
-          {:delay, deadline} ->
-            IO.inspect("DELAYED: #{ack_id} #{inspect deadline}")
+      defp dispatch(messages) do
+        case handle_messages(messages) do
+          {:ok, opts} ->
+            acks = Keyword.get(opts, :ack, [])
+            delays = Keyword.get(opts, :delay, [])
+            IO.inspect("ACKED: #{inspect acks}")
+            IO.inspect("DELAYED: #{inspect delays}")
+          _ ->
+            IO.inspect("OTHER!")
         end
       end
     end
