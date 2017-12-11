@@ -14,14 +14,7 @@ defmodule Pubsub.Message do
     %__MODULE__{id: message.message_id,
                 ack_id: ack_id,
                 published_at: DateTime.from_unix!(message.publish_time.seconds),
-                attributes: attributes_to_map(message.attributes),
+                attributes: message.attributes,
                 data: message.data}
-  end
-
-  defp attributes_to_map(attributes) do
-    attributes
-    |> Enum.reduce(%{}, fn (%{key: key, value: value}, acc) ->
-      Map.put(acc, key, value)
-    end)
   end
 end

@@ -112,7 +112,7 @@ defmodule Pubsub.Client.PublisherTest do
   describe "Publisher.publish/3" do
     setup [:setup_client, :stub_publish, :verify_on_exit!]
 
-    test "successfully publish many messages", %{client: client} do
+    test "successfully publish many messages with data", %{client: client} do
       topic = Util.full_topic(client.project, @topic)
       ids = ["message-1", "message-2"]
       PublisherStubMock
@@ -124,7 +124,7 @@ defmodule Pubsub.Client.PublisherTest do
         Publisher.publish(client, ["data-1", "data-2"] , @topic)
     end
 
-    test "successfully publish a single message", %{client: client} do
+    test "successfully publish a single message with data", %{client: client} do
       topic = Util.full_topic(client.project, @topic)
       ids = ["message-1"]
       PublisherStubMock
@@ -134,6 +134,30 @@ defmodule Pubsub.Client.PublisherTest do
       end)
       assert :ok ==
         Publisher.publish(client, "data", @topic)
+    end
+
+    test "successfully publish a single message with attributes and data", %{client: client} do
+      topic = Util.full_topic(client.project, @topic)
+      ids = ["message-1"]
+      PublisherStubMock
+      |> expect(:publish, fn
+        (_, %{topic: ^topic}, _) ->
+          {:ok, %PublishResponse{message_ids: ids}}
+      end)
+      assert :ok ==
+        Publisher.publish(client, {"data", %{"foo" => "bar"}}, @topic)
+    end
+
+    test "successfully publish a single message with attributes", %{client: client} do
+      topic = Util.full_topic(client.project, @topic)
+      ids = ["message-1"]
+      PublisherStubMock
+      |> expect(:publish, fn
+        (_, %{topic: ^topic}, _) ->
+          {:ok, %PublishResponse{message_ids: ids}}
+      end)
+      assert :ok ==
+        Publisher.publish(client, %{"foo" => "bar"}, @topic)
     end
 
     test "error publishing messages", %{client: client} do

@@ -51,6 +51,11 @@ defmodule Pubsub.Client do
   @typedoc "Options used when pulling messages"
   @type pull_options :: [pull_option]
 
+  @typedoc "Option values used when publishing messages"
+  @type publish_option :: {:attributes, %{optional(String.t) => String.t}}
+
+  @typedoc "Options used when publishing messages"
+  @type publish_options :: [publish_option]
 
   @typedoc "A cursor used for pagination of lists"
   @type cursor :: String.t
@@ -136,8 +141,8 @@ defmodule Pubsub.Client do
         {:reply, Publisher.delete_topic(client, name), client}
       {:topics, opts} ->
         {:reply, Publisher.topics(client, opts), client}
-      {:publish, data, topic} ->
-        {:reply, Publisher.publish(client, data, topic), client}
+      {:publish, messages, topic} ->
+        {:reply, Publisher.publish(client, messages, topic), client}
       {:create_subscription, name, topic, opts} ->
         {:reply, Subscriber.create_subscription(client, name, topic, opts), client}
       {:delete_subscription, name} ->

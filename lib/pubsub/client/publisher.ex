@@ -8,11 +8,17 @@ defmodule Pubsub.Client.Publisher do
   alias Google_Pubsub_V1.ListTopicsRequest
   alias Google_Pubsub_V1.ListTopicsResponse
   alias Google_Pubsub_V1.DeleteTopicRequest
+  alias Google_Pubsub_V1.PublishRequest.AttributesEntry
   alias Pubsub.Client
   alias Pubsub.Client.Util
   alias Pubsub.TopicDetails
 
   @default_list_max 50
+
+  @typedoc "A new pubsub message -- can contain data, attributes, or both"
+  @type new_message :: data :: binary |
+                       attributes :: map |
+                       {data :: binary, attributes :: map}
 
   defp stub_module do
     Application.get_env(:pubsub, :publisher_stub, Google_Pubsub_V1.Publisher.Stub)
@@ -60,14 +66,24 @@ defmodule Pubsub.Client.Publisher do
     end
   end
 
-  @spec publish(Client.t, data :: binary, topic :: String.t) :: :ok | Client.error
-  def publish(client, data, topic) when not is_list(data),
-    do: publish(client, [data], topic)
-  def publish(client, data, topic) do
-    messages = for d <- data, do: PubsubMessage.new(data: d)
+  @spec publish(Client.t, new_message | [new_message], topic :: String.t) :: :ok | Client.error
+  def publish(client, message, topic) when not is_list(message),
+    do: publish(client, [message], topic)
+  def publish(client, messages, topic) do
+    messages =
+      messages
+      |> Enum.map(fn
+        data when is_binary(data) ->
+          PubsubMessage.new(data: data)
+        attributes when is_map(attributes) ->
+          PubsubMessage.new(attributes: attributes)
+        {data, attributes} when is_binary(data) and is_map(attributes) ->
+          PubsubMessage.new(data: data, attributes: attributes)
+        message ->
+          PubsubMessage.new()
+      end)
     request = PublishRequest.new(topic: Util.full_topic(client.project, topic),
-                                 messages: messages,
-                                 attributes: %{})
+                                 messages: messages)
     client.channel
     |> stub_module().publish(request, Client.request_opts(client))
     |> case do

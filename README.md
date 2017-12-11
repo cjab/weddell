@@ -7,7 +7,6 @@ Code can be found at: [https://github.com/cjab/weddell](https://github.com/cjab/
 
 ## Installation
 
-
 1) Add weddell to your list of dependencies in `mix.exs`:
 
 ```
@@ -34,7 +33,7 @@ defmoudle MyApp.Consumer do
 
   def handle_messages(messages) do
     # Process messages
-    :ack
+    {:ok, ack: ack_messages, delay: delay_messages}
   end
 end
 
@@ -57,12 +56,14 @@ end
 ### Publishing a message
 
 ```
-Weddell.publish(data, "topic-name")
+Weddell.create_topic("topic-name")
+Weddell.create_subscription("subscription-name")
+Weddell.publish("data", "topic-name")
 ```
 
 ## Alternatives
 
-Weddell uses Pubsub's GRPC API which is still in beta. It also optionally
+Weddell uses Pubsub's GRPC API which is still in beta. It also
 makes use of streaming APIs that are considered experimental. If the
 beta/experimental status of Weddell worries you [Kane](https://github.com/peburrows/kane)
 may be a better choice. It uses the more mature Pubsub REST API.

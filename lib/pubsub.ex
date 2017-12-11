@@ -5,11 +5,10 @@ defmodule Pubsub do
   use Application
 
   alias Pubsub.Client
+  alias Pubsub.Message
+  alias Pubsub.Client.Publisher
   alias Pubsub.Client.Subscriber.Stream
   alias GRPC.RPCError
-
-  @typedoc "WIP: What is this?"
-  @type message :: any
 
   @typedoc "An RPC error"
   @type error :: {:error, RPCError.t}
@@ -152,18 +151,39 @@ defmodule Pubsub do
   end
 
   @doc """
-  Publish a message to a topic
+  Publish message or messages to a topic.
 
   ## Examples
 
-      Pubsub.publish("message-data", "foo-topic")
+      ### Data only
+
+      "message-data"
+      |> Pubsub.publish("foo-topic")
       #=> :ok
 
+      ### Data and attributes
+
+      {"message-data", %{"foo" => "bar"}}
+      |> Pubsub.publish("foo-topic")
+      #=> :ok
+
+      ### Attributes only
+
+      %{"foo" => "bar"}
+      |> Pubsub.publish("foo-topic")
+      #=> :ok
+
+      ### A list of messages (data and attributes)
+
+      [{"message-data-1", %{"foo" => "bar"}},
+       {"message-data-2", %{"foo" => "bar"}}]
+      |> Pubsub.publish("foo-topic")
+
   """
-  @spec publish(data :: String.t, topic_name :: String.t) ::
-    {:ok, message_ids :: [String.t]} | error
-  def publish(data, topic) do
-    GenServer.call(Pubsub.Client, {:publish, data, topic})
+  @spec publish(Publisher.new_message | [Publisher.new_message],
+                topic_name :: String.t) :: :ok | error
+  def publish(messages, topic) do
+    GenServer.call(Pubsub.Client, {:publish, messages, topic})
   end
 
   @doc """
@@ -184,7 +204,7 @@ defmodule Pubsub do
       it may be fewer. _(default: 10)_
   """
   @spec pull(subscription_name :: String.t, Client.pull_options) ::
-    {:ok, messages :: [message]} | error
+    {:ok, messages :: [Message.t]} | error
   def pull(subscription, opts \\ []) do
     GenServer.call(Pubsub.Client, {:pull, subscription, opts})
   end
