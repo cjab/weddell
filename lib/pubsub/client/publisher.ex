@@ -60,8 +60,7 @@ defmodule Pubsub.Client.Publisher do
     end
   end
 
-  @spec publish(Client.t, data :: binary, topic :: String.t) ::
-    {:ok, [message_id :: String.t]} | Client.error
+  @spec publish(Client.t, data :: binary, topic :: String.t) :: :ok | Client.error
   def publish(client, data, topic) when not is_list(data),
     do: publish(client, [data], topic)
   def publish(client, data, topic) do
@@ -73,7 +72,7 @@ defmodule Pubsub.Client.Publisher do
     |> stub_module().publish(request, Client.request_opts(client))
     |> case do
       {:error, _rpc_error} = error -> error
-      {:ok, %PublishResponse{message_ids: ids}} -> {:ok, ids}
+      {:ok, %PublishResponse{}} -> :ok
     end
   end
 end

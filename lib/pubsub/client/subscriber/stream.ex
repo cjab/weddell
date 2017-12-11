@@ -15,9 +15,16 @@ defmodule Pubsub.Client.Subscriber.Stream do
 
   @spec open(Client.t, subscription :: String.t) :: t
   def open(client, subscription) do
-    %__MODULE__{client: client,
-                subscription: subscription,
-                grpc_stream: Stub.streaming_pull(client.channel, Client.request_opts(client))}
+    stream =
+      %__MODULE__{client: client,
+                  subscription: subscription,
+                  grpc_stream: Stub.streaming_pull(client.channel, Client.request_opts(client))}
+    request =
+      StreamingPullRequest.new(subscription: Util.full_subscription(client.project, subscription),
+                               stream_ack_deadline_seconds: @default_ack_deadline)
+    stream.grpc_stream
+    |> GRPC.Stub.stream_send(request)
+    stream
   end
 
   @spec close(t) :: :ok
@@ -28,34 +35,38 @@ defmodule Pubsub.Client.Subscriber.Stream do
     GRPC.Stub.stream_send(stream.grpc_stream, request, end_stream: true)
   end
 
-  @typedoc "An ack id and a new deadline in seconds"
-  @type deadline :: {ack_id :: String.t, seconds :: pos_integer}
+  @typedoc "A message and a new deadline in seconds"
+  @type message_delay :: {Message.t, seconds :: pos_integer}
 
   @typedoc "Option values used when writing to a stream"
-  @type send_opt :: {:ack, ack_ids :: [String.t]} |
-                      {:modify_deadline, [deadline]} |
-                      {:stream_deadline, seconds :: pos_integer}
+  @type send_opt :: {:ack, [Message.t]} |
+                    {:delay, [message_delay]} |
+                    {:stream_deadline, seconds :: pos_integer}
 
   @typedoc "Options used when writing to a stream"
   @type send_opts :: [send_opt]
 
   @spec send(stream :: t, send_opts) :: :ok
   def send(stream, opts \\ [])  do
+    ack_ids =
+      opts
+      |> Keyword.get(:ack, [])
+      |> Enum.map(&(&1.ack_id))
     {deadline_ack_ids, deadline_seconds} =
       opts
-      |> Keyword.get(:modify_deadline, [])
-      |> Enum.reduce({[], []}, fn ({id, deadline}, {ids, deadlines}) ->
-        {[id | ids], [deadline | deadlines]}
+      |> Keyword.get(:delay, [])
+      |> Enum.reduce({[], []}, fn ({message, seconds}, {ids, deadlines}) ->
+        {[message.ack_id | ids], [seconds | deadlines]}
       end)
+    stream_deadline =
+      opts
+      |> Keyword.get(:stream_deadline, @default_ack_deadline)
     request =
       StreamingPullRequest.new(
-        subscription: Util.full_subscription(stream.client.project, stream.subscription),
-        ack_ids: Keyword.get(opts, :ack, []),
+        ack_ids: ack_ids,
         modify_deadline_ack_ids: deadline_ack_ids,
         modify_deadline_seconds: deadline_seconds,
-        stream_ack_deadline_seconds: Keyword.get(opts,
-                                                 :stream_ack_deadline_seconds,
-                                                 @default_ack_deadline))
+        stream_ack_deadline_seconds: stream_deadline)
     GRPC.Stub.stream_send(stream.grpc_stream, request)
   end
 

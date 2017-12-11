@@ -120,7 +120,7 @@ defmodule Pubsub.Client.PublisherTest do
         (_, %{topic: ^topic}, _) ->
           {:ok, %PublishResponse{message_ids: ids}}
       end)
-      assert {:ok, ids} ==
+      assert :ok ==
         Publisher.publish(client, ["data-1", "data-2"] , @topic)
     end
 
@@ -132,7 +132,7 @@ defmodule Pubsub.Client.PublisherTest do
         (_, %{topic: ^topic}, _) ->
           {:ok, %PublishResponse{message_ids: ids}}
       end)
-      assert {:ok, ids} ==
+      assert :ok ==
         Publisher.publish(client, "data", @topic)
     end
 

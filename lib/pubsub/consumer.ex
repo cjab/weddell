@@ -3,12 +3,9 @@ defmodule Pubsub.Consumer do
   alias Pubsub.Message
   alias Pubsub.Client.Subscriber
 
-  @typedoc "A list delay tuple"
-  @type message_delay :: {Message.t, pos_integer}
-
   @typedoc "Message handler response option"
   @type response_option :: {:ack, [Message.t]} |
-                           {:delay, [message_delay]}
+                           {:delay, [Subscriber.Stream.message_delay]}
 
   @typedoc "Option values used when connecting clients"
   @type response_options:: [response_option]
@@ -18,6 +15,7 @@ defmodule Pubsub.Consumer do
 
   defmacro __using__(_opts) do
     quote do
+      require Logger
       @behaviour Pubsub.Consumer
 
       def child_spec(subscription) do
@@ -38,7 +36,6 @@ defmodule Pubsub.Consumer do
         stream =
           Pubsub.client()
           |> Subscriber.Stream.open(subscription)
-        Subscriber.Stream.send(stream)
         GenServer.cast(self(), :listen)
         {:ok, stream}
       end
@@ -47,22 +44,29 @@ defmodule Pubsub.Consumer do
         stream
         |> Subscriber.Stream.recv()
         |> Enum.each(fn (%{received_messages: messages}) ->
+          Logger.debug fn ->
+            {"Dispatching messages", count: length(messages)}
+          end
           messages
           |> Enum.map(&Message.new/1)
-          |> dispatch()
+          |> dispatch(stream)
         end)
         {:stop, :stream_closed, stream}
       end
 
-      defp dispatch(messages) do
+      defp dispatch(messages, stream) do
         case handle_messages(messages) do
           {:ok, opts} ->
-            acks = Keyword.get(opts, :ack, [])
-            delays = Keyword.get(opts, :delay, [])
-            IO.inspect("ACKED: #{inspect acks}")
-            IO.inspect("DELAYED: #{inspect delays}")
-          _ ->
-            IO.inspect("OTHER!")
+            Logger.debug fn ->
+              ack = Keyword.get(opts, :ack, [])
+              delay = Keyword.get(opts, :delay, [])
+              {"Sending message response",
+                ack_count: length(ack),
+                delay_count: length(delay),
+                no_response_count: length(messages) - length(ack) + length(delay)}
+            end
+            stream
+            |> Subscriber.Stream.send(opts)
         end
       end
     end
