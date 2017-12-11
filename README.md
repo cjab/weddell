@@ -9,7 +9,7 @@ Code can be found at: [https://github.com/cjab/weddell](https://github.com/cjab/
 
 1) Add weddell to your list of dependencies in `mix.exs`:
 
-```
+```elixir
 def deps do
   [{:weddell, "~> 0.1.0"}]
 end
@@ -17,7 +17,7 @@ end
 
 2) Configure Goth with your GCP service account credentials:
 
-```
+```elixir
 config :goth,
   json: {:system, "GCP_CREDENTIALS_JSON"}
 ```
@@ -26,9 +26,9 @@ config :goth,
 
 ### Creating a consumer
 
-```
+```elixir
 # In your application code
-defmoudle MyApp.Consumer do
+defmodule MyApp.Consumer do
   use Weddell.Consumer
 
   def handle_messages(messages) do
@@ -55,7 +55,7 @@ end
 
 ### Publishing a message
 
-```
+```elixir
 Weddell.create_topic("topic-name")
 Weddell.create_subscription("subscription-name")
 Weddell.publish("data", "topic-name")
