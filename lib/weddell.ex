@@ -8,7 +8,8 @@ defmodule Weddell do
   alias Weddell.{Message,
                  Client,
                  Client.Publisher,
-                 Client.Publisher.Stream}
+                 Client.Subscriber.Stream,
+                 SubscriptionDetails}
 
   @typedoc "An RPC error"
   @type error :: {:error, RPCError.t}
@@ -214,14 +215,14 @@ defmodule Weddell do
 
   ## Examples
 
-      ack_ids = ["projects/project/subscriptions/foo:1",
-                 "projects/project/subscriptions/foo:2"]
-      Weddell.acknowledge(ack_ids, "foo-subscription")
+      messages = [%Message{}, %Message{}]
+      Weddell.acknowledge(messages, "foo-subscription")
       #=> :ok
   """
-  @spec acknowledge(ack_ids :: [String.t], subscription_name :: String.t) :: :ok | error
-  def acknowledge(ack_ids, subscription) do
-    GenServer.call(Weddell.Client, {:acknowledge, ack_ids, subscription})
+  @spec acknowledge(messages :: [Message.t] | message :: Message.t,
+                    subscription_name :: String.t) :: :ok | error
+  def acknowledge(messages, subscription) do
+    GenServer.call(Weddell.Client, {:acknowledge, messages, subscription})
   end
 
   @doc """

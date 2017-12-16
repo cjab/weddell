@@ -5,7 +5,7 @@ defmodule Weddell.Message do
 
   @type t :: %__MODULE__{id: String.t,
                          ack_id: String.t,
-                         published_at: Datetime.t,
+                         published_at: DateTime.t,
                          attributes: map,
                          data: binary}
   defstruct [:id, :ack_id, :published_at, :attributes, :data]

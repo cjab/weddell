@@ -13,8 +13,8 @@ defmodule Weddell.Client do
   @default_port 443
 
   @typedoc "A Weddell client"
-  @opaque t :: %__MODULE__{channel: GRPC.Channel.t,
-                           project: String.t}
+  @type t :: %__MODULE__{channel: GRPC.Channel.t,
+                         project: String.t}
 
   defstruct [:channel, :project]
 
@@ -128,8 +128,8 @@ defmodule Weddell.Client do
                       project: project}}
   end
 
-  @spec request_opts(client :: t) :: Keyword.t
-  def request_opts(_client) do
+  @spec request_opts() :: Keyword.t
+  def request_opts() do
     [metadata: auth_header(), content_type: "application/grpc"]
   end
 
@@ -151,8 +151,8 @@ defmodule Weddell.Client do
         {:reply, Subscriber.subscriptions(client, opts), client}
       {:pull, subscription, opts} ->
         {:reply, Subscriber.pull(client, subscription, opts), client}
-      {:acknowledge, ack_ids, subscription} ->
-        {:reply, Subscriber.acknowledge(client, ack_ids, subscription), client}
+      {:acknowledge, messages, subscription} ->
+        {:reply, Subscriber.acknowledge(client, messages, subscription), client}
       {:client} ->
         {:reply, client, client}
     end

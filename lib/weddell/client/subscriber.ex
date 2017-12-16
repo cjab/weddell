@@ -37,7 +37,7 @@ defmodule Weddell.Client.Subscriber do
         push_config: push_config,
         ack_deadline_seconds: ack_deadline)
     client.channel
-    |> stub_module().create_subscription(subscription, Client.request_opts(client))
+    |> stub_module().create_subscription(subscription, Client.request_opts())
     |> case do
       {:error, _rpc_error} = error -> error
       {:ok, _subscription} -> :ok
@@ -50,7 +50,7 @@ defmodule Weddell.Client.Subscriber do
       DeleteSubscriptionRequest.new(
         subscription: Util.full_subscription(client.project, name))
     client.channel
-    |> stub_module().delete_subscription(request, Client.request_opts(client))
+    |> stub_module().delete_subscription(request, Client.request_opts())
     |> case do
       {:error, _rpc_error} = error -> error
       {:ok, %Empty{}} -> :ok
@@ -68,7 +68,7 @@ defmodule Weddell.Client.Subscriber do
                                     page_size: max_topics,
                                     page_token: cursor)
     client.channel
-    |> stub_module().list_subscriptions(request, Client.request_opts(client))
+    |> stub_module().list_subscriptions(request, Client.request_opts())
     |> case do
       {:error, _rpc_error} = error -> error
       {:ok, %ListSubscriptionsResponse{next_page_token: nil} = response} ->
@@ -89,7 +89,7 @@ defmodule Weddell.Client.Subscriber do
         return_immediately: Keyword.get(opts, :return_immediately, true),
         max_messages: Keyword.get(opts, :max_messages, 1))
     client.channel
-    |> stub_module().pull(request, Client.request_opts(client))
+    |> stub_module().pull(request, Client.request_opts())
     |> case do
       {:error, _rpc_error} = error ->
         error
@@ -98,17 +98,17 @@ defmodule Weddell.Client.Subscriber do
     end
   end
 
-  @spec acknowledge(Client.t, ack_ids :: [String.t] | ack_id :: String.t,
-                    subscription_name :: String.t) :: {:ok, [Message.t]} | Client.error
-  def acknowledge(client, ack_id, subscription) when not is_list(ack_id),
-    do: acknowledge(client, [ack_id], subscription)
-  def acknowledge(client, ack_ids, subscription) do
+  @spec acknowledge(Client.t, (messages :: [Message.t]) | (message :: Message.t),
+                    subscription_name :: String.t) :: :ok | Client.error
+  def acknowledge(client, message, subscription) when not is_list(message),
+    do: acknowledge(client, [message], subscription)
+  def acknowledge(client, messages, subscription) do
     request =
       AcknowledgeRequest.new(
         subscription: Util.full_subscription(client.project, subscription),
-        ack_ids: ack_ids)
+        ack_ids: Enum.map(messages, &(&1.ack_id)))
     client.channel
-    |> stub_module().acknowledge(request, Client.request_opts(client))
+    |> stub_module().acknowledge(request, Client.request_opts())
     |> case do
       {:error, _rpc_error} = error -> error
       {:ok, %Empty{}} -> :ok

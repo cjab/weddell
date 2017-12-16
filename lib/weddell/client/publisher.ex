@@ -28,7 +28,7 @@ defmodule Weddell.Client.Publisher do
   def create_topic(client, name) do
     topic = Topic.new(name: Util.full_topic(client.project, name))
     client.channel
-    |> stub_module().create_topic(topic, Client.request_opts(client))
+    |> stub_module().create_topic(topic, Client.request_opts())
     |> case do
       {:error, _rpc_error} = error -> error
       {:ok, %Topic{}} -> :ok
@@ -39,14 +39,14 @@ defmodule Weddell.Client.Publisher do
   def delete_topic(client, name) do
     request = DeleteTopicRequest.new(topic: Util.full_topic(client.project, name))
     client.channel
-    |> stub_module().delete_topic(request, Client.request_opts(client))
+    |> stub_module().delete_topic(request, Client.request_opts())
     |> case do
       {:error, _rpc_error} = error -> error
       {:ok, %Empty{}} -> :ok
     end
   end
 
-  @spec topics(Client.t, opts :: Client.list_opt) ::
+  @spec topics(Client.t, opts :: Client.list_options) ::
     {:ok, [String.t]} | Client.error
   def topics(client, opts \\ []) do
     max_topics = Keyword.get(opts, :max, @default_list_max)
@@ -55,7 +55,7 @@ defmodule Weddell.Client.Publisher do
                                     page_size: max_topics,
                                     page_token: cursor)
     client.channel
-    |> stub_module().list_topics(request, Client.request_opts(client))
+    |> stub_module().list_topics(request, Client.request_opts())
     |> case do
       {:error, _rpc_error} = error ->
         error
@@ -85,7 +85,7 @@ defmodule Weddell.Client.Publisher do
     request = PublishRequest.new(topic: Util.full_topic(client.project, topic),
                                  messages: messages)
     client.channel
-    |> stub_module().publish(request, Client.request_opts(client))
+    |> stub_module().publish(request, Client.request_opts())
     |> case do
       {:error, _rpc_error} = error -> error
       {:ok, %PublishResponse{}} -> :ok

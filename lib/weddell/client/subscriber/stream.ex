@@ -3,7 +3,8 @@ defmodule Weddell.Client.Subscriber.Stream do
   alias GRPC.Stub, as: GRPCStub
   alias Google_Pubsub_V1.{Subscriber.Stub,
                           StreamingPullRequest}
-  alias Weddell.{Client,
+  alias Weddell.{Message,
+                 Client,
                  Client.Util}
 
   @typedoc "A Pub/Sub subscriber stream"
@@ -19,7 +20,7 @@ defmodule Weddell.Client.Subscriber.Stream do
     stream =
       %__MODULE__{client: client,
                   subscription: subscription,
-                  grpc_stream: Stub.streaming_pull(client.channel, Client.request_opts(client))}
+                  grpc_stream: Stub.streaming_pull(client.channel, Client.request_opts())}
     request =
       StreamingPullRequest.new(subscription: Util.full_subscription(client.project, subscription),
                                stream_ack_deadline_seconds: @default_ack_deadline)

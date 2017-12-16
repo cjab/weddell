@@ -178,36 +178,39 @@ defmodule Weddell.Client.SubscriberTest do
 
     test "successfully acks messages", %{client: client} do
       subscription = Util.full_subscription(client.project, @subscription)
-      ack_ids = ["ack-1", "ack-2"]
+      messages = [%Message{ack_id: "ack-1"}, %Message{ack_id: "ack-2"}]
+      ack_ids = Enum.map(messages, &(&1.ack_id))
       SubscriberStubMock
       |> expect(:acknowledge, fn
         (_, %{subscription: ^subscription, ack_ids: ^ack_ids}, _) ->
           {:ok, %Empty{}}
       end)
       assert :ok ==
-        Subscriber.acknowledge(client, ack_ids, @subscription)
+        Subscriber.acknowledge(client, messages, @subscription)
     end
 
     test "successfully acks single message", %{client: client} do
       subscription = Util.full_subscription(client.project, @subscription)
       ack_id = "ack-1"
+      message = %Message{ack_id: ack_id}
       SubscriberStubMock
       |> expect(:acknowledge, fn
         (_, %{subscription: ^subscription, ack_ids: [^ack_id]}, _) ->
           {:ok, %Empty{}}
       end)
       assert :ok ==
-        Subscriber.acknowledge(client, ack_id, @subscription)
+        Subscriber.acknowledge(client, message, @subscription)
     end
 
     test "error acking messages", %{client: client} do
       error = %RPCError{}
+      message = %Message{ack_id: "ack-1"}
       SubscriberStubMock
       |> expect(:acknowledge, fn _, _, _ ->
           {:error, error}
       end)
       assert {:error, error} ==
-        Subscriber.acknowledge(client, "ack-1", @subscription)
+        Subscriber.acknowledge(client, message, @subscription)
     end
   end
 
