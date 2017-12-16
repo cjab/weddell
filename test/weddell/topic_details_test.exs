@@ -1,8 +1,9 @@
-defmodule Pubsub.TopicDetailsTest do
+defmodule Weddell.TopicDetailsTest do
   use ExUnit.Case
-  alias Pubsub.TopicDetails
+
   alias Google_Pubsub_V1.Topic
-  alias Pubsub.Client.Util
+  alias Weddell.{TopicDetails,
+                 Client.Util}
 
   @project "test-project"
   @topic "test-topic"

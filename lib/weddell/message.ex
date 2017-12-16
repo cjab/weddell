@@ -1,4 +1,4 @@
-defmodule Pubsub.Message do
+defmodule Weddell.Message do
   @moduledoc """
   """
   alias Google_Pubsub_V1.ReceivedMessage

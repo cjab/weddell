@@ -1,9 +1,10 @@
-defmodule Pubsub.MessageTest do
+defmodule Weddell.MessageTest do
   use ExUnit.Case
-  alias Pubsub.Message
+
   alias Google_Protobuf.Timestamp
-  alias Google_Pubsub_V1.PubsubMessage
-  alias Google_Pubsub_V1.ReceivedMessage
+  alias Google_Pubsub_V1.{PubsubMessage,
+                          ReceivedMessage}
+  alias Weddell.Message
 
   @data "data"
   @ack_id "ack-id"

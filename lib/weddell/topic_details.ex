@@ -1,4 +1,4 @@
-defmodule Pubsub.TopicDetails do
+defmodule Weddell.TopicDetails do
   @moduledoc """
   A struct storing information about a topic
   """

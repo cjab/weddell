@@ -1,8 +1,9 @@
 # Weddell
 
-Weddell is an Elixir client for [Google Pubsub](https://cloud.google.com/pubsub/).
+Weddell is an Elixir client for [Google Pub/Sub](https://cloud.google.com/pubsub/).
 
 Documentation can be found at: [https://hex.pm/weddell](https://hex.pm/weddell).
+
 Code can be found at: [https://github.com/cjab/weddell](https://github.com/cjab/weddell).
 
 ## Installation
@@ -63,7 +64,7 @@ Weddell.publish("data", "topic-name")
 
 ## Alternatives
 
-Weddell uses Pubsub's GRPC API which is still in beta. It also
+Weddell uses Pub/Sub's GRPC API which is still in beta. It also
 makes use of streaming APIs that are considered experimental. If the
 beta/experimental status of Weddell worries you [Kane](https://github.com/peburrows/kane)
-may be a better choice. It uses the more mature Pubsub REST API.
+may be a better choice. It uses the more mature Pub/Sub REST API.

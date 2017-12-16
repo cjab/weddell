@@ -1,13 +1,13 @@
-defmodule Pubsub.SubscriberStub do
-  alias Google_Pubsub_V1.Subscription
-  alias Google_Pubsub_V1.DeleteSubscriptionRequest
-  alias Google_Pubsub_V1.ListSubscriptionsRequest
-  alias Google_Pubsub_V1.ListSubscriptionsResponse
-  alias Google_Pubsub_V1.PullRequest
-  alias Google_Pubsub_V1.PullResponse
-  alias Google_Protobuf.Empty
-  alias Pubsub.Client
+defmodule Weddell.SubscriberStub do
   alias GRPC.Channel
+  alias Google_Protobuf.Empty
+  alias Google_Pubsub_V1.{Subscription,
+                          DeleteSubscriptionRequest,
+                          ListSubscriptionsRequest,
+                          ListSubscriptionsResponse,
+                          PullRequest,
+                          PullResponse}
+  alias Weddell.Client
 
   @callback create_subscription(Channel.t, Subscription.t, Keyword.t) ::
     {:ok, Subscription.t} | Client.error
@@ -21,4 +21,4 @@ defmodule Pubsub.SubscriberStub do
     {:ok, Empty.t} | Client.error
 end
 
-Mox.defmock(Pubsub.SubscriberStubMock, for: Pubsub.SubscriberStub)
+Mox.defmock(Weddell.SubscriberStubMock, for: Weddell.SubscriberStub)

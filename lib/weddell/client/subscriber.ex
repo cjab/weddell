@@ -1,23 +1,24 @@
-defmodule Pubsub.Client.Subscriber do
+defmodule Weddell.Client.Subscriber do
   @moduledoc false
-  alias Pubsub.Client
-  alias Pubsub.Message
   alias Google_Protobuf.Empty
-  alias Google_Pubsub_V1.PushConfig
-  alias Google_Pubsub_V1.PullRequest
-  alias Google_Pubsub_V1.PullResponse
-  alias Google_Pubsub_V1.Subscription
-  alias Google_Pubsub_V1.AcknowledgeRequest
-  alias Google_Pubsub_V1.ListSubscriptionsRequest
-  alias Google_Pubsub_V1.ListSubscriptionsResponse
-  alias Google_Pubsub_V1.DeleteSubscriptionRequest
-  alias Pubsub.Client.Util
-  alias Pubsub.SubscriptionDetails
+  alias Google_Pubsub_V1.{PushConfig,
+                          PullRequest,
+                          PullResponse,
+                          Subscription,
+                          Subscriber.Stub,
+                          AcknowledgeRequest,
+                          ListSubscriptionsRequest,
+                          ListSubscriptionsResponse,
+                          DeleteSubscriptionRequest}
+  alias Weddell.{Message,
+                 Client,
+                 Client.Util,
+                 SubscriptionDetails}
 
   @default_list_max 50
 
   defp stub_module do
-    Application.get_env(:pubsub, :subscriber_stub, Google_Pubsub_V1.Subscriber.Stub)
+    Application.get_env(:weddell, :subscriber_stub, Stub)
   end
 
   @spec create_subscription(Client.t, name :: String.t,

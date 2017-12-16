@@ -1,4 +1,4 @@
-defmodule Pubsub.SubscriptionDetails do
+defmodule Weddell.SubscriptionDetails do
   @moduledoc """
   A struct storing information about a subscription
   """

@@ -1,27 +1,27 @@
-defmodule Pubsub.Client.Publisher do
+defmodule Weddell.Client.Publisher do
   @moduledoc false
   alias Google_Protobuf.Empty
-  alias Google_Pubsub_V1.Topic
-  alias Google_Pubsub_V1.PubsubMessage
-  alias Google_Pubsub_V1.PublishRequest
-  alias Google_Pubsub_V1.PublishResponse
-  alias Google_Pubsub_V1.ListTopicsRequest
-  alias Google_Pubsub_V1.ListTopicsResponse
-  alias Google_Pubsub_V1.DeleteTopicRequest
-  alias Google_Pubsub_V1.PublishRequest.AttributesEntry
-  alias Pubsub.Client
-  alias Pubsub.Client.Util
-  alias Pubsub.TopicDetails
+  alias Google_Pubsub_V1.{Topic,
+                          Publisher.Stub,
+                          PubsubMessage,
+                          PublishRequest,
+                          PublishResponse,
+                          ListTopicsRequest,
+                          ListTopicsResponse,
+                          DeleteTopicRequest}
+  alias Weddell.{Client,
+                 Client.Util,
+                 TopicDetails}
 
   @default_list_max 50
 
-  @typedoc "A new pubsub message -- can contain data, attributes, or both"
+  @typedoc "A new Pub/Sub message -- can contain data, attributes, or both"
   @type new_message :: data :: binary |
                        attributes :: map |
                        {data :: binary, attributes :: map}
 
   defp stub_module do
-    Application.get_env(:pubsub, :publisher_stub, Google_Pubsub_V1.Publisher.Stub)
+    Application.get_env(:weddell, :publisher_stub, Stub)
   end
 
   @spec create_topic(Client.t, name :: String.t) :: :ok | Client.error
@@ -79,7 +79,7 @@ defmodule Pubsub.Client.Publisher do
           PubsubMessage.new(attributes: attributes)
         {data, attributes} when is_binary(data) and is_map(attributes) ->
           PubsubMessage.new(data: data, attributes: attributes)
-        message ->
+        _message ->
           PubsubMessage.new()
       end)
     request = PublishRequest.new(topic: Util.full_topic(client.project, topic),

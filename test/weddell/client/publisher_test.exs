@@ -1,18 +1,20 @@
-defmodule Pubsub.Client.PublisherTest do
+defmodule Weddell.Client.PublisherTest do
   use ExUnit.Case
+
   import Mox
+
   alias GRPC.RPCError
   alias Google_Protobuf.Empty
-  alias Pubsub.Client
-  alias Pubsub.Client.Util
-  alias Pubsub.TopicDetails
-  alias Pubsub.Client.Publisher
-  alias Pubsub.PublisherStubMock
-  alias Google_Pubsub_V1.Topic
-  alias Google_Pubsub_V1.PublishResponse
-  alias Google_Pubsub_V1.ListTopicsResponse
+  alias Google_Pubsub_V1.{Topic,
+                          PublishResponse,
+                          ListTopicsResponse}
+  alias Weddell.{Client,
+                 Client.Util,
+                 TopicDetails,
+                 Client.Publisher,
+                 PublisherStubMock}
 
-  Application.put_env(:pubsub, :publisher_stub, PublisherStubMock)
+  Application.put_env(:weddell, :publisher_stub, PublisherStubMock)
 
   @project "test-project"
   @topic "test-topic"

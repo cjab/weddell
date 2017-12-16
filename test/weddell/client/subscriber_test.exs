@@ -1,20 +1,22 @@
-defmodule Pubsub.Client.SubscriberTest do
+defmodule Weddell.Client.SubscriberTest do
   use ExUnit.Case
+
   import Mox
+
   alias GRPC.RPCError
   alias Google_Protobuf.Empty
-  alias Google_Pubsub_V1.ListSubscriptionsResponse
-  alias Google_Pubsub_V1.Subscription
-  alias Google_Pubsub_V1.ReceivedMessage
-  alias Google_Pubsub_V1.PullResponse
-  alias Pubsub.Client
-  alias Pubsub.Client.Subscriber
-  alias Pubsub.Client.Util
-  alias Pubsub.SubscriptionDetails
-  alias Pubsub.SubscriberStubMock
-  alias Pubsub.Message
+  alias Google_Pubsub_V1.{Subscription,
+                          PullResponse,
+                          ReceivedMessage,
+                          ListSubscriptionsResponse}
+  alias Weddell.{Message,
+                 Client,
+                 Client.Util,
+                 Client.Subscriber,
+                 SubscriberStubMock,
+                 SubscriptionDetails}
 
-  Application.put_env(:pubsub, :subscriber_stub, SubscriberStubMock)
+  Application.put_env(:weddell, :subscriber_stub, SubscriberStubMock)
 
   @project "test-project"
   @topic "test-topic"

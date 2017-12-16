@@ -1,8 +1,9 @@
-defmodule Pubsub.SubscriptionDetailsTest do
+defmodule Weddell.SubscriptionDetailsTest do
   use ExUnit.Case
-  alias Pubsub.SubscriptionDetails
+
   alias Google_Pubsub_V1.Subscription
-  alias Pubsub.Client.Util
+  alias Weddell.{SubscriptionDetails,
+                 Client.Util}
 
   @project "test-project"
   @topic "test-topic"

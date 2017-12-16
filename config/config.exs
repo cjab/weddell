@@ -1,5 +1,5 @@
 use Mix.Config
-config :pubsub,
+config :weddell,
   scheme: :http,
   host: "localhost",
   port: 8085,

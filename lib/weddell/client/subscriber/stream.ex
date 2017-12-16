@@ -1,14 +1,15 @@
-defmodule Pubsub.Client.Subscriber.Stream do
-  alias Pubsub.Client
-  alias Pubsub.Client.Util
-  alias Google_Pubsub_V1.Subscriber.Stub
-  alias Google_Pubsub_V1.StreamingPullRequest
-  alias Google_Pubsub_V1.StreamingPullResponse
+defmodule Weddell.Client.Subscriber.Stream do
+  alias GRPC.Client.Stream, as: GRPCStream
+  alias GRPC.Stub, as: GRPCStub
+  alias Google_Pubsub_V1.{Subscriber.Stub,
+                          StreamingPullRequest}
+  alias Weddell.{Client,
+                 Client.Util}
 
-  @typedoc "A pubsub subscriber stream"
-  @opaque t :: %__MODULE__{client: Pubsub.Client.t,
+  @typedoc "A Pub/Sub subscriber stream"
+  @opaque t :: %__MODULE__{client: Client.t,
                            subscription: String.t,
-                           grpc_stream: GRPC.Client.Stream.t}
+                           grpc_stream: GRPCStream.t}
   defstruct [:client, :subscription, :grpc_stream]
 
   @default_ack_deadline 10
@@ -23,7 +24,7 @@ defmodule Pubsub.Client.Subscriber.Stream do
       StreamingPullRequest.new(subscription: Util.full_subscription(client.project, subscription),
                                stream_ack_deadline_seconds: @default_ack_deadline)
     stream.grpc_stream
-    |> GRPC.Stub.stream_send(request)
+    |> GRPCStub.stream_send(request)
     stream
   end
 
@@ -32,7 +33,7 @@ defmodule Pubsub.Client.Subscriber.Stream do
     request =
       StreamingPullRequest.new(
         subscription: Util.full_subscription(stream.client.project, stream.subscription))
-    GRPC.Stub.stream_send(stream.grpc_stream, request, end_stream: true)
+    GRPCStub.stream_send(stream.grpc_stream, request, end_stream: true)
   end
 
   @typedoc "A message and a new deadline in seconds"
@@ -67,11 +68,11 @@ defmodule Pubsub.Client.Subscriber.Stream do
         modify_deadline_ack_ids: deadline_ack_ids,
         modify_deadline_seconds: deadline_seconds,
         stream_ack_deadline_seconds: stream_deadline)
-    GRPC.Stub.stream_send(stream.grpc_stream, request)
+    GRPCStub.stream_send(stream.grpc_stream, request)
   end
 
   @spec recv(stream :: t) :: Enumerable.t
   def recv(stream) do
-    GRPC.Stub.recv(stream.grpc_stream)
+    GRPCStub.recv(stream.grpc_stream)
   end
 end

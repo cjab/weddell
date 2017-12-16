@@ -1,14 +1,14 @@
-defmodule Pubsub do
+defmodule Weddell do
   @moduledoc """
-  Documentation for Pubsub.
+  Documentation for Weddell.
   """
   use Application
 
-  alias Pubsub.Client
-  alias Pubsub.Message
-  alias Pubsub.Client.Publisher
-  alias Pubsub.Client.Subscriber.Stream
   alias GRPC.RPCError
+  alias Weddell.{Message,
+                 Client,
+                 Client.Publisher,
+                 Client.Publisher.Stream}
 
   @typedoc "An RPC error"
   @type error :: {:error, RPCError.t}
@@ -26,31 +26,31 @@ defmodule Pubsub do
   """
   @spec client() :: Client.t
   def client do
-    GenServer.call(Pubsub.Client, {:client})
+    GenServer.call(Weddell.Client, {:client})
   end
 
   @doc """
   Creates a new topic belonging to the configured project.
 
   ## Examples
-      Pubsub.create_topic("foo")
+      Weddell.create_topic("foo")
       #=> :ok
   """
   @spec create_topic(topic_name :: String.t) :: :ok | error
   def create_topic(name) do
-    GenServer.call(Pubsub.Client, {:create_topic, name})
+    GenServer.call(Weddell.Client, {:create_topic, name})
   end
 
   @doc """
   Deletes a topic belonging to the configured project.
 
   ## Examples
-      Pubsub.delete_topic("foo")
+      Weddell.delete_topic("foo")
       #=> :ok
   """
   @spec delete_topic(topic_name :: String.t) :: :ok | error
   def delete_topic(name) do
-    GenServer.call(Pubsub.Client, {:delete_topic, name})
+    GenServer.call(Weddell.Client, {:delete_topic, name})
   end
 
   @doc """
@@ -58,12 +58,12 @@ defmodule Pubsub do
 
   ## Examples
 
-      Pubsub.topics(max: 50)
+      Weddell.topics(max: 50)
       #=> {:ok, ["foo", "bar", ...]}
 
   When more topics exist:
 
-      Pubsub.topics(max: 1)
+      Weddell.topics(max: 1)
       #=> {:ok, ["foo"], "list-cursor"}
 
   ## Options
@@ -79,7 +79,7 @@ defmodule Pubsub do
     {:ok, topic_names :: [String.t], Client.cursor} |
     error
   def topics(opts \\ []) do
-    GenServer.call(Pubsub.Client, {:topics, opts})
+    GenServer.call(Weddell.Client, {:topics, opts})
   end
 
   @doc """
@@ -88,7 +88,7 @@ defmodule Pubsub do
 
   ## Examples
 
-      Pubsub.create_subscription("foo-subscription", "foo-topic", ack_deadline: 10)
+      Weddell.create_subscription("foo-subscription", "foo-topic", ack_deadline: 10)
       #=> :ok
 
   ## Options
@@ -106,19 +106,19 @@ defmodule Pubsub do
                             topic_name :: String.t,
                             Client.subscription_options) :: :ok | error
   def create_subscription(name, topic, opts \\ []) do
-    GenServer.call(Pubsub.Client, {:create_subscription, name, topic, opts})
+    GenServer.call(Weddell.Client, {:create_subscription, name, topic, opts})
   end
 
   @doc """
   Deletes a subscription belonging to the configured project.
 
   ## Examples
-      Pubsub.delete_subscription("foo")
+      Weddell.delete_subscription("foo")
       #=> :ok
   """
   @spec delete_subscription(subscription_name :: String.t) :: :ok | error
   def delete_subscription(name) do
-    GenServer.call(Pubsub.Client, {:delete_subscription, name})
+    GenServer.call(Weddell.Client, {:delete_subscription, name})
   end
 
   @doc """
@@ -126,12 +126,12 @@ defmodule Pubsub do
 
   ## Examples
 
-      Pubsub.subscriptions(max: 50)
+      Weddell.subscriptions(max: 50)
       #=> {:ok, [%SubscriptionDetails{}, %SubscriptionDetails{}, ...]}
 
   When more subscriptions exist:
 
-      Pubsub.subscriptions(max: 1)
+      Weddell.subscriptions(max: 1)
       #=> {:ok, [%SubscriptionDetails{}], "list-cursor"}
 
   ## Options
@@ -147,7 +147,7 @@ defmodule Pubsub do
     {:ok, subscriptions :: [SubscriptionDetails.t], Client.cursor} |
     error
   def subscriptions(opts \\ []) do
-    GenServer.call(Pubsub.Client, {:subscriptions, opts})
+    GenServer.call(Weddell.Client, {:subscriptions, opts})
   end
 
   @doc """
@@ -158,32 +158,32 @@ defmodule Pubsub do
       ### Data only
 
       "message-data"
-      |> Pubsub.publish("foo-topic")
+      |> Weddell.publish("foo-topic")
       #=> :ok
 
       ### Data and attributes
 
       {"message-data", %{"foo" => "bar"}}
-      |> Pubsub.publish("foo-topic")
+      |> Weddell.publish("foo-topic")
       #=> :ok
 
       ### Attributes only
 
       %{"foo" => "bar"}
-      |> Pubsub.publish("foo-topic")
+      |> Weddell.publish("foo-topic")
       #=> :ok
 
       ### A list of messages (data and attributes)
 
       [{"message-data-1", %{"foo" => "bar"}},
        {"message-data-2", %{"foo" => "bar"}}]
-      |> Pubsub.publish("foo-topic")
+      |> Weddell.publish("foo-topic")
 
   """
   @spec publish(Publisher.new_message | [Publisher.new_message],
                 topic_name :: String.t) :: :ok | error
   def publish(messages, topic) do
-    GenServer.call(Pubsub.Client, {:publish, messages, topic})
+    GenServer.call(Weddell.Client, {:publish, messages, topic})
   end
 
   @doc """
@@ -191,7 +191,7 @@ defmodule Pubsub do
 
   ## Examples
 
-      Pubsub.pull("foo-subscription", return_immediately: true, max_messages: 10)
+      Weddell.pull("foo-subscription", return_immediately: true, max_messages: 10)
       #=> {:ok, [%Message{}]}
 
   ## Options
@@ -206,7 +206,7 @@ defmodule Pubsub do
   @spec pull(subscription_name :: String.t, Client.pull_options) ::
     {:ok, messages :: [Message.t]} | error
   def pull(subscription, opts \\ []) do
-    GenServer.call(Pubsub.Client, {:pull, subscription, opts})
+    GenServer.call(Weddell.Client, {:pull, subscription, opts})
   end
 
   @doc """
@@ -216,12 +216,12 @@ defmodule Pubsub do
 
       ack_ids = ["projects/project/subscriptions/foo:1",
                  "projects/project/subscriptions/foo:2"]
-      Pubsub.acknowledge(ack_ids, "foo-subscription")
+      Weddell.acknowledge(ack_ids, "foo-subscription")
       #=> :ok
   """
   @spec acknowledge(ack_ids :: [String.t], subscription_name :: String.t) :: :ok | error
   def acknowledge(ack_ids, subscription) do
-    GenServer.call(Pubsub.Client, {:acknowledge, ack_ids, subscription})
+    GenServer.call(Weddell.Client, {:acknowledge, ack_ids, subscription})
   end
 
   @doc """
@@ -229,11 +229,11 @@ defmodule Pubsub do
 
   ## Examples
 
-      Pubsub.open_stream("foo-subscription")
+      Weddell.open_stream("foo-subscription")
       #=> %Stream{}
   """
   @spec open_stream(subscription_name :: String.t) :: Stream.t
   def open_stream(subscription) do
-    GenServer.call(Pubsub.Client, {:open_stream, subscription})
+    GenServer.call(Weddell.Client, {:open_stream, subscription})
   end
 end

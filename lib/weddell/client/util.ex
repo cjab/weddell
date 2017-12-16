@@ -1,4 +1,4 @@
-defmodule Pubsub.Client.Util do
+defmodule Weddell.Client.Util do
   @moduledoc false
 
   @spec full_subscription(project :: String.t, subscription :: String.t) :: String.t

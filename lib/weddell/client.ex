@@ -1,18 +1,18 @@
-defmodule Pubsub.Client do
+defmodule Weddell.Client do
   @moduledoc """
   A persistent process responsible for interacting with Pusub over GRPC.
   """
   use GenServer
 
-  alias GRPC.Stub
-  alias GRPC.RPCError
-  alias Pubsub.Client.Publisher
-  alias Pubsub.Client.Subscriber
+  alias GRPC.{Stub,
+              RPCError}
+  alias Weddell.Client.{Publisher,
+                        Subscriber}
 
   @default_host "pubsub.googleapis.com"
   @default_port 443
 
-  @typedoc "A pubsub client"
+  @typedoc "A Weddell client"
   @opaque t :: %__MODULE__{channel: GRPC.Channel.t,
                            project: String.t}
 
@@ -61,13 +61,13 @@ defmodule Pubsub.Client do
   @type cursor :: String.t
 
   @doc """
-  Start the client process and connect to Pubsub using settings in the application config.
+  Start the client process and connect to Pub/Sub using settings in the application config.
 
   ## Example
 
   In your application config:
 
-      config :pubsub,
+      config :weddell,
         scheme: :http,
         host: "localhost",
         port: 8085,
@@ -76,9 +76,9 @@ defmodule Pubsub.Client do
   ## Settings
 
     * `project` - The __required__ Google Cloud project that will be used for all calls made by this client.
-    * `scheme` - The scheme to use when connecting to the pubsub service. _(default: :https)_
-    * `host` - The pubsub host to connect to. This defaults to Google's pubsub service but
-      is useful for connecting to a local pubsub emulator _(default: "pubsub.googleapis.com")_
+    * `scheme` - The scheme to use when connecting to the Pub/Sub service. _(default: :https)_
+    * `host` - The Pub/Sub host to connect to. This defaults to Google's Pub/Sub service but
+      is useful for connecting to a local Pub/Sub emulator _(default: "pubsub.googleapis.com")_
     * `port` - The port on which to connect to the host. _(default: 443)_
     * `ssl` - SSL settings to be used when connecting with the `:https` scheme. See `ssl_option()`
       in the [ssl documentation] (http://erlang.org/doc/man/ssl.html).
@@ -89,16 +89,16 @@ defmodule Pubsub.Client do
   end
 
   def init(:ok) do
-    connect(Application.get_env(:pubsub, :project),
-            Application.get_all_env(:pubsub))
+    connect(Application.get_env(:weddell, :project),
+            Application.get_all_env(:weddell))
   end
 
   @doc """
-  Connect to a pubsub server and return a client.
+  Connect to a Pub/Sub server and return a client.
 
   ## Example
 
-      Pubsub.Client.connect("project-name",
+      Weddell.Client.connect("project-name",
                             scheme: :https,
                             host: "pubsub.googleapis.com",
                             port: 443,
@@ -107,9 +107,9 @@ defmodule Pubsub.Client do
 
   ## Options
 
-    * `scheme` - The scheme to use when connecting to the pubsub service. _(default: :https)_
-    * `host` - The pubsub host to connect to. This defaults to Google's pubsub service but
-      is useful for connecting to a local pubsub emulator _(default: "pubsub.googleapis.com")_
+    * `scheme` - The scheme to use when connecting to the Pub/Sub service. _(default: :https)_
+    * `host` - The Pub/Sub host to connect to. This defaults to Google's Pub/Sub service but
+      is useful for connecting to a local Pub/Sub emulator _(default: "pubsub.googleapis.com")_
     * `port` - The port on which to connect to the host. _(default: 443)_
     * `ssl` - SSL settings to be used when connecting with the `:https` scheme. See `ssl_option()`
       in the [ssl documentation](http://erlang.org/doc/man/ssl.html).

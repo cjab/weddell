@@ -1,6 +1,6 @@
-defmodule Pubsub.Client.UtilTest do
+defmodule Weddell.Client.UtilTest do
   use ExUnit.Case
-  alias Pubsub.Client.Util
+  alias Weddell.Client.Util
 
   @project "test-project"
   @topic "test-topic"

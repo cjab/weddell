@@ -1,7 +1,6 @@
-defmodule Pubsub.Consumer do
-  alias Pubsub.Client
-  alias Pubsub.Message
-  alias Pubsub.Client.Subscriber
+defmodule Weddell.Consumer do
+  alias Weddell.{Message,
+                 Client.Subscriber}
 
   @typedoc "Message handler response option"
   @type response_option :: {:ack, [Message.t]} |
@@ -16,7 +15,7 @@ defmodule Pubsub.Consumer do
   defmacro __using__(_opts) do
     quote do
       require Logger
-      @behaviour Pubsub.Consumer
+      @behaviour Weddell.Consumer
 
       def child_spec(subscription) do
         %{
@@ -34,7 +33,7 @@ defmodule Pubsub.Consumer do
 
       def init(subscription) do
         stream =
-          Pubsub.client()
+          Weddell.client()
           |> Subscriber.Stream.open(subscription)
         GenServer.cast(self(), :listen)
         {:ok, stream}
