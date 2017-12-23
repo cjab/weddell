@@ -25,6 +25,13 @@ config :goth,
 
 ## Getting Started
 
+### Creating a topic and subscription
+
+```elixir
+Weddell.create_topic("topic-name")
+Weddell.create_subscription("subscription-name")
+```
+
 ### Creating a consumer
 
 ```elixir
@@ -33,8 +40,16 @@ defmodule MyApp.Consumer do
   use Weddell.Consumer
 
   def handle_messages(messages) do
-    # Process messages
-    {:ok, ack: ack_messages, delay: delay_messages}
+    %{true => processed_messages, false => failed_messages} =
+      Enum.group_by(messages, &process_message/1)
+    # Delay failed messages for at least 60 seconds
+    delay_messages =
+      Enum.map(failed_messages, fn msg -> {msg, 60} end)
+    {:ok, ack: processed_messages, delay: delay_messages}
+  end
+
+  def process_message(message) do
+    ...
   end
 end
 
@@ -56,11 +71,55 @@ end
 
 ### Publishing a message
 
+#### With data
+
 ```elixir
-Weddell.create_topic("topic-name")
-Weddell.create_subscription("subscription-name")
-Weddell.publish("data", "topic-name")
+"data"
+|> Weddell.publish("topic-name")
 ```
+
+#### With json data
+
+```elixir
+%{foo: "bar"}
+|> Poison.encode!()
+|> Weddell.publish("topic-name")
+```
+
+#### With data and attributes
+
+```elixir
+{"data", %{attr1: "value1"}}
+|> Weddell.publish("topic-name")
+```
+
+#### With only attributes
+
+```elixir
+%{attr1: "value1"}
+|> Weddell.publish("topic-name")
+```
+
+#### Multiple messages
+
+```elixir
+["message1", "message2", "message3"]
+|> Weddell.publish("topic-name")
+
+[{"message1", %{attr1: "value1"}},
+ {"message2", %{attr2: "value2"}},
+ {"message3", %{attr3: "value3"}}]
+|> Weddell.publish("topic-name")
+```
+
+## TODO
+
+- [ ] Update topics
+- [ ] Update subscriptions
+- [ ] Modify ack deadline (non-streaming)
+- [ ] GRPC stream error handling
+- [ ] Integration tests
+- [ ] Snapshots?
 
 ## Alternatives
 

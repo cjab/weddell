@@ -8,7 +8,9 @@ defmodule Weddell.Mixfile do
       elixir: "~> 1.5",
       elixirc_paths: elixirc_paths(Mix.env),
       start_permanent: Mix.env == :prod,
-      deps: deps()
+      deps: deps(),
+      docs: [main: "README",
+             extras: ["README.md"]]
     ]
   end
 
