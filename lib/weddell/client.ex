@@ -149,6 +149,8 @@ defmodule Weddell.Client do
         {:reply, Subscriber.delete_subscription(client, name), client}
       {:subscriptions, opts} ->
         {:reply, Subscriber.subscriptions(client, opts), client}
+      {:topic_subscriptions, topic, opts} ->
+        {:reply, Subscriber.topic_subscriptions(client, topic, opts), client}
       {:pull, subscription, opts} ->
         {:reply, Subscriber.pull(client, subscription, opts), client}
       {:acknowledge, messages, subscription} ->

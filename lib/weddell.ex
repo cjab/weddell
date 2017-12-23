@@ -152,6 +152,35 @@ defmodule Weddell do
   end
 
   @doc """
+  List subscriptions belonging to a topic.
+
+  ## Examples
+
+      Weddell.topic_subscriptions("foo-topic", max: 50)
+      #=> {:ok, ["foo-subscription", "bar-subscription", ...]}
+
+  When more subscriptions exist:
+
+      Weddell.topic_subscriptions("foo-topic", max: 1)
+      #=> {:ok, ["foo-subscription"], "list-cursor"}
+
+  ## Options
+
+    * `:max` - The maximum number of subscriptions to return fromn a single request.
+      If more subscriptions exist make another call using the returned cursor.
+      _(default: 50)_
+    * `:cursor` - List subscriptions starting at a cursor returned by an earlier call.
+      _(default: nil)_
+  """
+  @spec topic_subscriptions(topic :: String.t, opts :: Client.list_options) ::
+    {:ok, subscriptions :: [String.t]} |
+    {:ok, subscriptions :: [String.t], Client.cursor} |
+    error
+  def topic_subscriptions(topic, opts \\ []) do
+    GenServer.call(Weddell.Client, {:topic_subscriptions, topic, opts})
+  end
+
+  @doc """
   Publish message or messages to a topic.
 
   ## Examples
