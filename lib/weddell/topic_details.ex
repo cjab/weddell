@@ -2,7 +2,7 @@ defmodule Weddell.TopicDetails do
   @moduledoc """
   A struct storing information about a topic
   """
-  alias Google_Pubsub_V1.Topic
+  alias Google.Pubsub.V1.Topic
 
   @type t :: %__MODULE__{name: String.t, project: String.t}
   defstruct [:name, :project]

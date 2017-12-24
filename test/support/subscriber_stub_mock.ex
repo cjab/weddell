@@ -1,7 +1,7 @@
 defmodule Weddell.SubscriberStub do
   alias GRPC.Channel
-  alias Google_Protobuf.Empty
-  alias Google_Pubsub_V1.{Subscription,
+  alias Google.Protobuf.Empty
+  alias Google.Pubsub.V1.{Subscription,
                           DeleteSubscriptionRequest,
                           ListSubscriptionsRequest,
                           ListSubscriptionsResponse,

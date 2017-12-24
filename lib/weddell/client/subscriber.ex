@@ -1,7 +1,7 @@
 defmodule Weddell.Client.Subscriber do
   @moduledoc false
-  alias Google_Protobuf.Empty
-  alias Google_Pubsub_V1.{PushConfig,
+  alias Google.Protobuf.Empty
+  alias Google.Pubsub.V1.{PushConfig,
                           PullRequest,
                           PullResponse,
                           Subscription,

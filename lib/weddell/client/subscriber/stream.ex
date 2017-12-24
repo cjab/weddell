@@ -1,7 +1,7 @@
 defmodule Weddell.Client.Subscriber.Stream do
   alias GRPC.Client.Stream, as: GRPCStream
   alias GRPC.Stub, as: GRPCStub
-  alias Google_Pubsub_V1.{Subscriber.Stub,
+  alias Google.Pubsub.V1.{Subscriber.Stub,
                           StreamingPullRequest}
   alias Weddell.{Message,
                  Client,

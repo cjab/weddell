@@ -1,7 +1,7 @@
 defmodule Weddell.Message do
   @moduledoc """
   """
-  alias Google_Pubsub_V1.ReceivedMessage
+  alias Google.Pubsub.V1.ReceivedMessage
 
   @type t :: %__MODULE__{id: String.t,
                          ack_id: String.t,

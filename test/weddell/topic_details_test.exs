@@ -1,7 +1,7 @@
 defmodule Weddell.TopicDetailsTest do
   use ExUnit.Case
 
-  alias Google_Pubsub_V1.Topic
+  alias Google.Pubsub.V1.Topic
   alias Weddell.{TopicDetails,
                  Client.Util}
 
@@ -9,7 +9,7 @@ defmodule Weddell.TopicDetailsTest do
   @topic "test-topic"
 
   describe "TopicDetails.new/1" do
-    test "from a Google_Pubsub_V1.Topic" do
+    test "from a Google.Pubsub.V1.Topic" do
       topic = Topic.new(name: Util.full_topic(@project, @topic))
       assert %TopicDetails{project: @project, name: @topic} ==
         TopicDetails.new(topic)

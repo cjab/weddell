@@ -2,7 +2,7 @@ defmodule Weddell.SubscriptionDetails do
   @moduledoc """
   A struct storing information about a subscription
   """
-  alias Google_Pubsub_V1.Subscription
+  alias Google.Pubsub.V1.Subscription
 
   @type t :: %__MODULE__{
     name: String.t,

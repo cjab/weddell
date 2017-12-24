@@ -1,8 +1,8 @@
 defmodule Weddell.MessageTest do
   use ExUnit.Case
 
-  alias Google_Protobuf.Timestamp
-  alias Google_Pubsub_V1.{PubsubMessage,
+  alias Google.Protobuf.Timestamp
+  alias Google.Pubsub.V1.{PubsubMessage,
                           ReceivedMessage}
   alias Weddell.Message
 
@@ -11,7 +11,7 @@ defmodule Weddell.MessageTest do
   @id "id"
 
   describe "Message.new/1" do
-    test "from a Google_Pubsub_V1.ReceivedMessage" do
+    test "from a Google.Pubsub.V1.ReceivedMessage" do
       now =
         DateTime.utc_now() |> DateTime.to_unix()
       attributes = %{"key1" => "val1", "key2" => "val2"}

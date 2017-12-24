@@ -4,8 +4,8 @@ defmodule Weddell.Client.SubscriberTest do
   import Mox
 
   alias GRPC.RPCError
-  alias Google_Protobuf.Empty
-  alias Google_Pubsub_V1.{Subscription,
+  alias Google.Protobuf.Empty
+  alias Google.Pubsub.V1.{Subscription,
                           PullResponse,
                           ReceivedMessage,
                           ListSubscriptionsResponse,

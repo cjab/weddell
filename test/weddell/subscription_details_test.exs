@@ -1,7 +1,7 @@
 defmodule Weddell.SubscriptionDetailsTest do
   use ExUnit.Case
 
-  alias Google_Pubsub_V1.Subscription
+  alias Google.Pubsub.V1.Subscription
   alias Weddell.{SubscriptionDetails,
                  Client.Util}
 
@@ -13,7 +13,7 @@ defmodule Weddell.SubscriptionDetailsTest do
                  attributes: %{"attribute-1" => "value-1", "attribute-2" => "value-2"}}
 
   describe "SubscriptionDetails.new/1" do
-    test "from a Google_Pubsub_V1.Subscription" do
+    test "from a Google.Pubsub.V1.Subscription" do
       topic = Subscription.new(name: Util.full_subscription(@project, @subscription),
                                topic: Util.full_topic(@project, @topic),
                                ack_deadline_seconds: @deadline,

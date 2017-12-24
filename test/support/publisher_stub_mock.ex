@@ -1,7 +1,7 @@
 defmodule Weddell.PublisherStub do
   alias GRPC.Channel
-  alias Google_Protobuf.Empty
-  alias Google_Pubsub_V1.{Topic,
+  alias Google.Protobuf.Empty
+  alias Google.Pubsub.V1.{Topic,
                           PublishRequest,
                           PublishResponse,
                           ListTopicRequest,
