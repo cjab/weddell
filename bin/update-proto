@@ -1,7 +1,16 @@
 #!/bin/sh
+if [ "$MIX_HOME" = "" ]; then
+  export MIX_HOME=$HOME/.mix
+fi
+
+PLUGIN_PATH=$MIX_HOME/escripts/protoc-gen-elixir
+
+if [ ! -f $PLUGIN_PATH ]; then
+  mix escript.install hex protobuf
+fi
+
 DIR="$( cd "$( dirname "$0" )/.." && pwd )"
 TMP_DIR=$DIR/tmp
-PLUGIN_PATH=/Users/cjab/.asdf/installs/elixir/1.5.0/.mix/escripts/protoc-gen-elixir
 OUT=$DIR/lib/proto
 PROTOBUF_PATH=$TMP_DIR/protobuf
 GOOGLEAPIS_PATH=$TMP_DIR/googleapis
@@ -18,11 +27,6 @@ if [ ! -d "$PROTOC_PATH" ]; then
   unzip protoc.zip -d $PROTOC_PATH
   rm $TMP_DIR/protoc.zip
 fi
-
-#if [ ! -d "$PROTOBUF_PATH" ]; then
-#  git clone git@github.com:google/protobuf.git $PROTOBUF_PATH
-#fi
-#cd $PROTOBUF_PATH && git pull && cd $DIR
 
 if [ ! -d "$GOOGLEAPIS_PATH" ]; then
   git clone git@github.com:googleapis/googleapis.git $GOOGLEAPIS_PATH
