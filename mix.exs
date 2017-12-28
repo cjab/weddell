@@ -35,6 +35,7 @@ defmodule Weddell.Mixfile do
       {:certifi, "~> 2.0"},
       {:apex, "~> 1.2", only: :dev},
       {:mox, "~> 0.3", only: :test},
+      {:uuid, "~> 1.1", only: :test},
       {:dialyxir, "~> 0.5", only: [:dev], runtime: false},
     ]
   end

@@ -1,5 +1,6 @@
 defmodule Weddell.Client.UtilTest do
-  use ExUnit.Case
+  use Weddell.UnitCase
+
   alias Weddell.Client.Util
 
   @project "test-project"

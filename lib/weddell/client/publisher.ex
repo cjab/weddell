@@ -8,7 +8,9 @@ defmodule Weddell.Client.Publisher do
                           PublishResponse,
                           ListTopicsRequest,
                           ListTopicsResponse,
-                          DeleteTopicRequest}
+                          DeleteTopicRequest,
+                          ListTopicSubscriptionsRequest,
+                          ListTopicSubscriptionsResponse}
   alias Weddell.{Client,
                  Client.Util,
                  TopicDetails}
@@ -47,7 +49,9 @@ defmodule Weddell.Client.Publisher do
   end
 
   @spec topics(Client.t, opts :: Client.list_options) ::
-    {:ok, [String.t]} | Client.error
+    {:ok, [TopicDetails.t]} |
+    {:ok, [TopicDetails.t], Client.cursor} |
+    Client.error
   def topics(client, opts \\ []) do
     max_topics = Keyword.get(opts, :max, @default_list_max)
     cursor = Keyword.get(opts, :cursor, "")
@@ -59,7 +63,7 @@ defmodule Weddell.Client.Publisher do
     |> case do
       {:error, _rpc_error} = error ->
         error
-      {:ok, %ListTopicsResponse{topics: topics, next_page_token: nil}} ->
+      {:ok, %ListTopicsResponse{topics: topics, next_page_token: ""}} ->
         {:ok, Enum.map(topics, &TopicDetails.new/1)}
       {:ok, %ListTopicsResponse{topics: topics, next_page_token: next_cursor}} ->
         {:ok, Enum.map(topics, &TopicDetails.new/1), next_cursor}
@@ -89,6 +93,27 @@ defmodule Weddell.Client.Publisher do
     |> case do
       {:error, _rpc_error} = error -> error
       {:ok, %PublishResponse{}} -> :ok
+    end
+  end
+
+  @spec topic_subscriptions(Client.t, topic :: String.t, Client.list_options) ::
+    {:ok, [String.t]} |
+    {:ok, [String.t], Client.cursor} |
+    Client.error
+  def topic_subscriptions(client, topic, opts \\ []) do
+    max_topics = Keyword.get(opts, :max, @default_list_max)
+    cursor = Keyword.get(opts, :cursor, "")
+    request = ListTopicSubscriptionsRequest.new(topic: Util.full_topic(client.project, topic),
+                                                page_size: max_topics,
+                                                page_token: cursor)
+    client.channel
+    |> stub_module().list_topic_subscriptions(request, Client.request_opts())
+    |> case do
+      {:error, _rpc_error} = error -> error
+      {:ok, %ListTopicSubscriptionsResponse{next_page_token: nil} = response} ->
+        {:ok, Enum.map(response.subscriptions, &Util.parse_full_subscription/1)}
+      {:ok, %ListTopicSubscriptionsResponse{next_page_token: next_cursor} = response} ->
+        {:ok, Enum.map(response.subscriptions, &Util.parse_full_subscription/1), next_cursor}
     end
   end
 end

@@ -5,8 +5,6 @@ defmodule Weddell.SubscriberStub do
                           DeleteSubscriptionRequest,
                           ListSubscriptionsRequest,
                           ListSubscriptionsResponse,
-                          ListTopicSubscriptionsRequest,
-                          ListTopicSubscriptionsResponse,
                           PullRequest,
                           PullResponse}
   alias Weddell.Client
@@ -17,8 +15,6 @@ defmodule Weddell.SubscriberStub do
     {:ok, Empty.t} | Client.error
   @callback list_subscriptions(Channel.t, ListSubscriptionsRequest.t, Keyword.t) ::
     {:ok, ListSubscriptionsResponse.t} | Client.error
-  @callback list_topic_subscriptions(Channel.t, ListTopicSubscriptionsRequest.t, Keyword.t) ::
-    {:ok, ListTopicSubscriptionsResponse.t} | Client.error
   @callback pull(Channel.t, PullRequest.t, Keyword.t) ::
     {:ok, PullResponse.t} | Client.error
   @callback acknowledge(Channel.t, AcknowledgeRequest.t, Keyword.t) ::

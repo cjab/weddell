@@ -143,14 +143,14 @@ defmodule Weddell.Client do
         {:reply, Publisher.topics(client, opts), client}
       {:publish, messages, topic} ->
         {:reply, Publisher.publish(client, messages, topic), client}
+      {:topic_subscriptions, topic, opts} ->
+        {:reply, Publisher.topic_subscriptions(client, topic, opts), client}
       {:create_subscription, name, topic, opts} ->
         {:reply, Subscriber.create_subscription(client, name, topic, opts), client}
       {:delete_subscription, name} ->
         {:reply, Subscriber.delete_subscription(client, name), client}
       {:subscriptions, opts} ->
         {:reply, Subscriber.subscriptions(client, opts), client}
-      {:topic_subscriptions, topic, opts} ->
-        {:reply, Subscriber.topic_subscriptions(client, topic, opts), client}
       {:pull, subscription, opts} ->
         {:reply, Subscriber.pull(client, subscription, opts), client}
       {:acknowledge, messages, subscription} ->

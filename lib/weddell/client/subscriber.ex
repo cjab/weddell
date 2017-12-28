@@ -9,9 +9,7 @@ defmodule Weddell.Client.Subscriber do
                           AcknowledgeRequest,
                           ListSubscriptionsRequest,
                           ListSubscriptionsResponse,
-                          DeleteSubscriptionRequest,
-                          ListTopicSubscriptionsRequest,
-                          ListTopicSubscriptionsResponse}
+                          DeleteSubscriptionRequest}
   alias Weddell.{Message,
                  Client,
                  Client.Util,
@@ -79,27 +77,6 @@ defmodule Weddell.Client.Subscriber do
       {:ok, %ListSubscriptionsResponse{next_page_token: next_cursor} = response} ->
         details = Enum.map(response.subscriptions, &(SubscriptionDetails.new(&1)))
         {:ok, details, next_cursor}
-    end
-  end
-
-  @spec topic_subscriptions(Client.t, topic :: String.t, Client.list_options) ::
-    {:ok, [String.t]} |
-    {:ok, [String.t], Client.cursor} |
-    Client.error
-  def topic_subscriptions(client, topic, opts \\ []) do
-    max_topics = Keyword.get(opts, :max, @default_list_max)
-    cursor = Keyword.get(opts, :cursor, "")
-    request = ListTopicSubscriptionsRequest.new(topic: Util.full_topic(client.project, topic),
-                                                page_size: max_topics,
-                                                page_token: cursor)
-    client.channel
-    |> stub_module().list_topic_subscriptions(request, Client.request_opts())
-    |> case do
-      {:error, _rpc_error} = error -> error
-      {:ok, %ListTopicSubscriptionsResponse{next_page_token: nil} = response} ->
-        {:ok, response.subscriptions}
-      {:ok, %ListTopicSubscriptionsResponse{next_page_token: next_cursor} = response} ->
-        {:ok, response.subscriptions, next_cursor}
     end
   end
 

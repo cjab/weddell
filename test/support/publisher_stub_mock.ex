@@ -6,6 +6,8 @@ defmodule Weddell.PublisherStub do
                           PublishResponse,
                           ListTopicRequest,
                           ListTopicsResponse,
+                          ListTopicSubscriptionsRequest,
+                          ListTopicSubscriptionsResponse,
                           DeleteTopicRequest}
   alias Weddell.Client
 
@@ -17,6 +19,8 @@ defmodule Weddell.PublisherStub do
     {:ok, ListTopicsResponse.t} | Client.error
   @callback publish(Channel.t, PublishRequest.t, Keyword.t) ::
     {:ok, PublishResponse.t} | Client.error
+  @callback list_topic_subscriptions(Channel.t, ListTopicSubscriptionsRequest.t, Keyword.t) ::
+    {:ok, ListTopicSubscriptionsResponse.t} | Client.error
 end
 
 Mox.defmock(Weddell.PublisherStubMock, for: Weddell.PublisherStub)

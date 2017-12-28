@@ -1,5 +1,5 @@
 defmodule Weddell.TopicDetailsTest do
-  use ExUnit.Case
+  use Weddell.UnitCase
 
   alias Google.Pubsub.V1.Topic
   alias Weddell.{TopicDetails,

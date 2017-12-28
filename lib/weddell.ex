@@ -8,7 +8,6 @@ defmodule Weddell do
   alias Weddell.{Message,
                  Client,
                  Client.Publisher,
-                 Client.Subscriber.Stream,
                  SubscriptionDetails}
 
   @typedoc "An RPC error"
@@ -252,18 +251,5 @@ defmodule Weddell do
                     subscription_name :: String.t) :: :ok | error
   def acknowledge(messages, subscription) do
     GenServer.call(Weddell.Client, {:acknowledge, messages, subscription})
-  end
-
-  @doc """
-  Starts a streaming pull for the given subscription
-
-  ## Examples
-
-      Weddell.open_stream("foo-subscription")
-      #=> %Stream{}
-  """
-  @spec open_stream(subscription_name :: String.t) :: Stream.t
-  def open_stream(subscription) do
-    GenServer.call(Weddell.Client, {:open_stream, subscription})
   end
 end

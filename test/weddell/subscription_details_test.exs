@@ -1,5 +1,5 @@
 defmodule Weddell.SubscriptionDetailsTest do
-  use ExUnit.Case
+  use Weddell.UnitCase
 
   alias Google.Pubsub.V1.Subscription
   alias Weddell.{SubscriptionDetails,

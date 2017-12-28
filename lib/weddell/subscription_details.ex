@@ -3,6 +3,7 @@ defmodule Weddell.SubscriptionDetails do
   A struct storing information about a subscription
   """
   alias Google.Pubsub.V1.Subscription
+  alias Weddell.Client.Util
 
   @type t :: %__MODULE__{
     name: String.t,
@@ -16,12 +17,9 @@ defmodule Weddell.SubscriptionDetails do
              :push_endpoint, :push_attributes]
 
   def new(%Subscription{} = sub) do
-    %{"project" => project, "name" => name} =
-      ~r|projects/(?<project>[^/]*)/subscriptions/(?<name>.*)|
-      |> Regex.named_captures(sub.name)
-    %{"topic" => topic} =
-      ~r|projects/[^/]*/topics/(?<topic>.*)|
-      |> Regex.named_captures(sub.topic)
+    project = Util.parse_full_project(sub.name)
+    name = Util.parse_full_subscription(sub.name)
+    topic = Util.parse_full_topic(sub.topic)
 
     %__MODULE__{name: name, topic: topic, project: project,
       ack_deadline_seconds: sub.ack_deadline_seconds,

@@ -1,5 +1,5 @@
 defmodule Weddell.MessageTest do
-  use ExUnit.Case
+  use Weddell.UnitCase
 
   alias Google.Protobuf.Timestamp
   alias Google.Pubsub.V1.{PubsubMessage,

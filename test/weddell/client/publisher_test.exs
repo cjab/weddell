@@ -1,5 +1,5 @@
 defmodule Weddell.Client.PublisherTest do
-  use ExUnit.Case
+  use Weddell.UnitCase
 
   import Mox
 
@@ -7,17 +7,17 @@ defmodule Weddell.Client.PublisherTest do
   alias Google.Protobuf.Empty
   alias Google.Pubsub.V1.{Topic,
                           PublishResponse,
-                          ListTopicsResponse}
+                          ListTopicsResponse,
+                          ListTopicSubscriptionsResponse}
   alias Weddell.{Client,
                  Client.Util,
                  TopicDetails,
                  Client.Publisher,
                  PublisherStubMock}
 
-  Application.put_env(:weddell, :publisher_stub, PublisherStubMock)
-
   @project "test-project"
   @topic "test-topic"
+  @subscription "test-subscription"
 
   describe "Publisher.create_topic/2" do
     setup [:setup_client, :stub_create_topic, :verify_on_exit!]
@@ -77,8 +77,9 @@ defmodule Weddell.Client.PublisherTest do
       PublisherStubMock
       |> expect(:list_topics, fn
         (_, %{project: ^project, page_size: 50}, _) ->
-          {:ok, %ListTopicsResponse{topics: topics}}
+          {:ok, %ListTopicsResponse{topics: topics, next_page_token: ""}}
       end)
+
       assert {:ok, [TopicDetails.new(topic), TopicDetails.new(topic)]} ==
         Publisher.topics(client)
     end
@@ -173,6 +174,52 @@ defmodule Weddell.Client.PublisherTest do
     end
   end
 
+  describe "Publisher.topic_subscriptions/3" do
+    setup [:setup_client, :stub_list_topic_subscriptions, :verify_on_exit!]
+
+    test "list all topic subscriptions without paging", %{client: client} do
+      topic = Util.full_topic(client.project, @topic)
+      full_subscriptions =
+        [@subscription, @subscription]
+        |> Enum.map(&("projects/test-project/subscriptions/#{&1}"))
+      PublisherStubMock
+      |> expect(:list_topic_subscriptions, fn
+        (_, %{topic: ^topic, page_size: 50}, _) ->
+          {:ok, %ListTopicSubscriptionsResponse{subscriptions: full_subscriptions}}
+      end)
+      assert {:ok, [@subscription, @subscription]} ==
+        Publisher.topic_subscriptions(client, @topic)
+    end
+
+    test "list all subscriptions with paging", %{client: client} do
+      topic = Util.full_topic(client.project, @topic)
+      full_subscriptions =
+        [@subscription, @subscription]
+        |> Enum.map(&("projects/test-project/subscriptions/#{&1}"))
+      cursor = "page-token"
+      max = 100
+      PublisherStubMock
+      |> expect(:list_topic_subscriptions, fn
+        (_, %{topic: ^topic, page_token: ^cursor, page_size: ^max}, _) ->
+          {:ok,
+            %ListTopicSubscriptionsResponse{subscriptions: full_subscriptions,
+                                       next_page_token: cursor}}
+      end)
+      assert {:ok, [@subscription, @subscription], cursor} ==
+        Publisher.topic_subscriptions(client, @topic, cursor: cursor, max: max)
+    end
+
+    test "error listing subscriptions", %{client: client} do
+      error = %RPCError{}
+      PublisherStubMock
+      |> expect(:list_topic_subscriptions, fn _, _, _ ->
+        {:error, error}
+      end)
+      assert {:error, error} ==
+        Publisher.topic_subscriptions(client, @topic)
+    end
+  end
+
   defp setup_client(_) do
     [client: %Client{project: @project}]
   end
@@ -205,6 +252,14 @@ defmodule Weddell.Client.PublisherTest do
     PublisherStubMock
     |> stub(:publish, fn _, _, _ ->
       {:ok, %PublishResponse{}}
+    end)
+    :ok
+  end
+
+  defp stub_list_topic_subscriptions(_) do
+    PublisherStubMock
+    |> stub(:list_topic_subscriptions, fn _, _, _ ->
+      {:ok, %ListTopicSubscriptionsResponse{}}
     end)
     :ok
   end

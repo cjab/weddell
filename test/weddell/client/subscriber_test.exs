@@ -1,5 +1,5 @@
 defmodule Weddell.Client.SubscriberTest do
-  use ExUnit.Case
+  use Weddell.UnitCase
 
   import Mox
 
@@ -8,8 +8,7 @@ defmodule Weddell.Client.SubscriberTest do
   alias Google.Pubsub.V1.{Subscription,
                           PullResponse,
                           ReceivedMessage,
-                          ListSubscriptionsResponse,
-                          ListTopicSubscriptionsResponse}
+                          ListSubscriptionsResponse}
   alias Weddell.{Message,
                  Client,
                  Client.Util,
@@ -135,48 +134,6 @@ defmodule Weddell.Client.SubscriberTest do
     end
   end
 
-  describe "Subscriber.topic_subscriptions/3" do
-    setup [:setup_client, :stub_list_topic_subscriptions, :verify_on_exit!]
-
-    test "list all topic subscriptions without paging", %{client: client} do
-      topic = Util.full_topic(client.project, @topic)
-      subscriptions = [@subscription, @subscription]
-      SubscriberStubMock
-      |> expect(:list_topic_subscriptions, fn
-        (_, %{topic: ^topic, page_size: 50}, _) ->
-          {:ok, %ListTopicSubscriptionsResponse{subscriptions: subscriptions}}
-      end)
-      assert {:ok, subscriptions} ==
-        Subscriber.topic_subscriptions(client, @topic)
-    end
-
-    test "list all subscriptions with paging", %{client: client} do
-      topic = Util.full_topic(client.project, @topic)
-      subscriptions = [@subscription, @subscription]
-      cursor = "page-token"
-      max = 100
-      SubscriberStubMock
-      |> expect(:list_topic_subscriptions, fn
-        (_, %{topic: ^topic, page_token: ^cursor, page_size: ^max}, _) ->
-          {:ok,
-            %ListTopicSubscriptionsResponse{subscriptions: subscriptions,
-                                       next_page_token: cursor}}
-      end)
-      assert {:ok, subscriptions, cursor} ==
-        Subscriber.topic_subscriptions(client, @topic, cursor: cursor, max: max)
-    end
-
-    test "error listing subscriptions", %{client: client} do
-      error = %RPCError{}
-      SubscriberStubMock
-      |> expect(:list_topic_subscriptions, fn _, _, _ ->
-        {:error, error}
-      end)
-      assert {:error, error} ==
-        Subscriber.topic_subscriptions(client, @topic)
-    end
-  end
-
   describe "Subscriber.pull/3" do
     setup [:setup_client, :stub_pull, :verify_on_exit!]
 
@@ -281,14 +238,6 @@ defmodule Weddell.Client.SubscriberTest do
     SubscriberStubMock
     |> stub(:list_subscriptions, fn _, _, _ ->
       {:ok, %ListSubscriptionsResponse{}}
-    end)
-    :ok
-  end
-
-  defp stub_list_topic_subscriptions(_) do
-    SubscriberStubMock
-    |> stub(:list_topic_subscriptions, fn _, _, _ ->
-      {:ok, %ListTopicSubscriptionsResponse{}}
     end)
     :ok
   end
