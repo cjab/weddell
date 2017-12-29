@@ -8,11 +8,14 @@ Code can be found at: [https://github.com/cjab/weddell](https://github.com/cjab/
 
 ## Installation
 
-1) Add weddell to your list of dependencies in `mix.exs`:
+1) Add Weddell and Goth to your list of dependencies in `mix.exs`:
 
 ```elixir
 def deps do
-  [{:weddell, "~> 0.1.0"}]
+  [
+    {:weddell, "~> 0.1.0"},
+    {:goth, "~> 0.7"},
+  ]
 end
 ```
 
@@ -114,11 +117,11 @@ end
 
 ## TODO
 
+- [X] Integration tests
 - [ ] Update topics
 - [ ] Update subscriptions
 - [ ] Modify ack deadline (non-streaming)
 - [ ] GRPC stream error handling
-- [ ] Integration tests
 - [ ] Snapshots?
 
 ## Alternatives

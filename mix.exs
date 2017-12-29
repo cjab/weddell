@@ -31,11 +31,11 @@ defmodule Weddell.Mixfile do
       {:ex_doc, "~> 0.16", only: :dev, runtime: false},
       {:protobuf, "~> 0.5"},
       {:grpc, github: "tony612/grpc-elixir", branch: :master},
-      {:goth, "~> 0.7"},
       {:certifi, "~> 2.0"},
       {:apex, "~> 1.2", only: :dev},
       {:mox, "~> 0.3", only: :test},
       {:uuid, "~> 1.1", only: :test},
+      {:wait_for_it, github: "cjab/wait_for_it", branch: "update-ex-doc", only: :test},
       {:dialyxir, "~> 0.5", only: [:dev], runtime: false},
     ]
   end

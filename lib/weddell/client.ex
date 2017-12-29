@@ -165,9 +165,13 @@ defmodule Weddell.Client do
   end
 
   defp auth_header do
-    {:ok, %{token: token, type: token_type}} =
-      Goth.Token.for_scope("https://www.googleapis.com/auth/pubsub")
-    %{"authorization" => "#{token_type} #{token}"}
+    if Code.ensure_compiled?(Goth.Token) do
+      {:ok, %{token: token, type: token_type}} =
+        Goth.Token.for_scope("https://www.googleapis.com/auth/pubsub")
+      %{"authorization" => "#{token_type} #{token}"}
+    else
+      %{}
+    end
   end
 
   defp ssl_opts(opts) do
