@@ -1,5 +1,6 @@
 defmodule Weddell.Message do
   @moduledoc """
+  A single message containing data and/or attributes returned from Pub/Sub.
   """
   alias Google.Pubsub.V1.ReceivedMessage
 
@@ -10,6 +11,7 @@ defmodule Weddell.Message do
                          data: binary}
   defstruct [:id, :ack_id, :published_at, :attributes, :data]
 
+  @doc false
   def new(%ReceivedMessage{ack_id: ack_id, message: message}) do
     %__MODULE__{id: message.message_id,
                 ack_id: ack_id,

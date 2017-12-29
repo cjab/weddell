@@ -128,11 +128,13 @@ defmodule Weddell.Client do
                       project: project}}
   end
 
+  @doc false
   @spec request_opts() :: Keyword.t
   def request_opts() do
     [metadata: auth_header(), content_type: "application/grpc"]
   end
 
+  @doc false
   def handle_call(request, _, client) do
     case request do
       {:create_topic, name} ->
@@ -160,6 +162,7 @@ defmodule Weddell.Client do
     end
   end
 
+  @doc false
   def handle_info(_, client) do
     {:noreply, client}
   end

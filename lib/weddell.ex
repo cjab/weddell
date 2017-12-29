@@ -14,6 +14,7 @@ defmodule Weddell do
   @type error :: {:error, RPCError.t}
 
   @doc """
+  Start Weddell and connect to the Pub/Sub server.
   """
   def start(_type, _args) do
     import Supervisor.Spec
@@ -23,6 +24,7 @@ defmodule Weddell do
   end
 
   @doc """
+  Return the client currently connected to Pub/Sub.
   """
   @spec client() :: Client.t
   def client do

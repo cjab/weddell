@@ -1,4 +1,7 @@
 defmodule Weddell.Client.Subscriber.Stream do
+  @moduledoc """
+  A streaming connection to a subscription.
+  """
   alias GRPC.Client.Stream, as: GRPCStream
   alias GRPC.Stub, as: GRPCStub
   alias Google.Pubsub.V1.{Subscriber.Stub,
@@ -15,6 +18,18 @@ defmodule Weddell.Client.Subscriber.Stream do
 
   @default_ack_deadline 10
 
+  @doc """
+  Open a new stream on a subscription.
+
+  Streams can be used to pull new messages from a subscription and also
+  respond with acknowledgements or delays.
+
+  ## Example
+
+      {:ok, client} = Weddell.Client.connect("weddell-project")
+      Weddell.Client.Subscriber.Stream.open(client, "foo-subscription")
+      #=> %Weddell.Client.Subscriber.Stream{}
+  """
   @spec open(Client.t, subscription :: String.t) :: t
   def open(client, subscription) do
     stream =
@@ -29,6 +44,16 @@ defmodule Weddell.Client.Subscriber.Stream do
     stream
   end
 
+  @doc """
+  Close an open stream.
+
+  ## Example
+
+      {:ok, client} = Weddell.Client.connect("weddell-project")
+      stream = Weddell.Client.Subscriber.Stream.open(client, "foo-subscription")
+      Weddell.Client.Subscriber.Stream.close(stream)
+      #=> :ok
+  """
   @spec close(t) :: :ok
   def close(stream) do
     request =
@@ -48,6 +73,27 @@ defmodule Weddell.Client.Subscriber.Stream do
   @typedoc "Options used when writing to a stream"
   @type send_opts :: [send_opt]
 
+  @doc """
+  Send a response to a stream.
+
+  ## Example
+
+      {:ok, client} = Weddell.Client.connect("weddell-project")
+      stream = Weddell.Client.Subscriber.Stream.open(client, "foo-subscription")
+      Weddell.Client.Subscriber.Stream.send(stream,
+                                            ack: [%Message{}],
+                                            delay: [{%Message{}, 60}],
+                                            stream_deadline: 120)
+
+      #=> :ok
+
+  ## Options
+
+    * `ack` - Messages to be acknowledged. _(default: [])_
+    * `delay` - Messages to be delayed and the period for which to delay. _(default: [])_
+    * `stream_deadline` - The time period to wait before resending a
+       message on this stream. _(default: 10)_
+  """
   @spec send(stream :: t, send_opts) :: :ok
   def send(stream, opts \\ [])  do
     ack_ids =
@@ -72,8 +118,22 @@ defmodule Weddell.Client.Subscriber.Stream do
     GRPCStub.stream_send(stream.grpc_stream, request)
   end
 
+  @doc """
+  Receive messages from a stream.
+
+  ## Example
+
+      {:ok, client} = Weddell.Client.connect("weddell-project")
+      client
+      |> Weddell.Client.Subscriber.Stream.open("foo-subscription")
+      |> Weddell.Client.Subscriber.Stream.recv()
+      |> Enum.take(1)
+      #=> [%Message{...}]
+  """
   @spec recv(stream :: t) :: Enumerable.t
   def recv(stream) do
     GRPCStub.recv(stream.grpc_stream)
+    |> Stream.flat_map(&(&1.received_messages))
+    |> Stream.map(&Message.new/1)
   end
 end

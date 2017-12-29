@@ -1,12 +1,13 @@
 defmodule Weddell.TopicDetails do
   @moduledoc """
-  A struct storing information about a topic
+  A description of a Pub/Sub topic.
   """
   alias Google.Pubsub.V1.Topic
 
   @type t :: %__MODULE__{name: String.t, project: String.t}
   defstruct [:name, :project]
 
+  @doc false
   def new(%Topic{name: topic}) do
     %{"project" => project, "name" => name} =
       ~r|projects/(?<project>[^/]*)/topics/(?<name>.*)|

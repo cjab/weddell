@@ -46,9 +46,7 @@ defmodule Weddell.Consumer do
           Logger.debug fn ->
             {"Dispatching messages", count: length(messages)}
           end
-          messages
-          |> Enum.map(&Message.new/1)
-          |> dispatch(stream)
+          dispatch(messages, stream)
         end)
         {:stop, :stream_closed, stream}
       end

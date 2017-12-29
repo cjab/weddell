@@ -1,6 +1,6 @@
 defmodule Weddell.SubscriptionDetails do
   @moduledoc """
-  A struct storing information about a subscription
+  A description of a Pub/Sub subscription.
   """
   alias Google.Pubsub.V1.Subscription
   alias Weddell.Client.Util
@@ -16,6 +16,7 @@ defmodule Weddell.SubscriptionDetails do
   defstruct [:name, :topic, :project, :ack_deadline_seconds,
              :push_endpoint, :push_attributes]
 
+  @doc false
   def new(%Subscription{} = sub) do
     project = Util.parse_full_project(sub.name)
     name = Util.parse_full_subscription(sub.name)
