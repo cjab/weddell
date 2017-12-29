@@ -2,10 +2,6 @@
 
 Weddell is an Elixir client for [Google Pub/Sub](https://cloud.google.com/pubsub/).
 
-Documentation can be found at: [https://hex.pm/weddell](https://hex.pm/weddell).
-
-Code can be found at: [https://github.com/cjab/weddell](https://github.com/cjab/weddell).
-
 ## Installation
 
 1) Add Weddell and Goth to your list of dependencies in `mix.exs`:
@@ -13,7 +9,7 @@ Code can be found at: [https://github.com/cjab/weddell](https://github.com/cjab/
 ```elixir
 def deps do
   [
-    {:weddell, "~> 0.1.0"},
+    {:weddell, github: "cjab/weddell"},
     {:goth, "~> 0.7"},
   ]
 end
