@@ -32,15 +32,21 @@ defmodule Weddell.Mixfile do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:ex_doc, "~> 0.16", only: :dev, runtime: false},
+      # GRPC
       {:protobuf, "~> 0.5"},
       {:grpc, github: "tony612/grpc-elixir", branch: :master},
       {:certifi, "~> 2.0"},
-      {:apex, "~> 1.2", only: :dev},
+
+      # Testing
       {:mox, "~> 0.3", only: :test},
+      {:apex, "~> 1.2", only: [:test, :dev]},
       {:uuid, "~> 1.1", only: :test},
       {:wait_for_it, github: "cjab/wait_for_it", branch: "update-ex-doc", only: :test},
       {:dialyxir, "~> 0.5", only: [:dev], runtime: false},
+
+      # Docs
+      {:ex_doc, "~> 0.16", only: :docs},
+      {:inch_ex, ">= 0.0.0", only: :docs},
     ]
   end
 
