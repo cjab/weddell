@@ -1,4 +1,5 @@
 defmodule Google.Protobuf.FieldMask do
+  @moduledoc false
   use Protobuf, syntax: :proto3
 
   @type t :: %__MODULE__{
