@@ -9,6 +9,10 @@ defmodule Weddell.Mixfile do
       elixirc_paths: elixirc_paths(Mix.env),
       start_permanent: Mix.env == :prod,
       deps: deps(),
+      package: package(),
+      name: "Weddell",
+      description: description(),
+      source_url: "https://github.com/cjab/weddell",
       docs: [main: "README",
              extras: ["README.md"]]
     ]
@@ -37,6 +41,18 @@ defmodule Weddell.Mixfile do
       {:uuid, "~> 1.1", only: :test},
       {:wait_for_it, github: "cjab/wait_for_it", branch: "update-ex-doc", only: :test},
       {:dialyxir, "~> 0.5", only: [:dev], runtime: false},
+    ]
+  end
+
+  defp description do
+    "A Google Pub/Sub library for Elixir"
+  end
+
+  defp package do
+    [
+      maintainers: ["Chad Jablonski"],
+      licenses: ["MIT"],
+      links: %{"GitHub" => "https://github.com/cjab/weddell"},
     ]
   end
 end
