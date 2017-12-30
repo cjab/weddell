@@ -31,7 +31,7 @@ config :goth,
 
 ```elixir
 Weddell.create_topic("topic-name")
-Weddell.create_subscription("subscription-name")
+Weddell.create_subscription("subscription-name", "topic-name")
 ```
 
 ### Creating a consumer
