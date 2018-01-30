@@ -18,9 +18,11 @@ def deps do
 end
 ```
 
-2) Configure Goth with your GCP service account credentials:
+2) Configure Weddell and Goth with your GCP service account credentials:
 
 ```elixir
+config :weddell,
+  project: "gcp-project-name"
 config :goth,
   json: {:system, "GCP_CREDENTIALS_JSON"}
 ```
