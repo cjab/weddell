@@ -42,7 +42,7 @@ defmodule Weddell.Consumer do
       def handle_cast(:listen, stream) do
         stream
         |> Subscriber.Stream.recv()
-        |> Enum.each(fn (%{received_messages: messages}) ->
+        |> Enum.each(fn messages ->
           Logger.debug fn ->
             {"Dispatching messages", count: length(messages)}
           end

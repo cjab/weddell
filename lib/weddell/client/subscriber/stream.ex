@@ -133,7 +133,9 @@ defmodule Weddell.Client.Subscriber.Stream do
   @spec recv(stream :: t) :: Enumerable.t
   def recv(stream) do
     GRPCStub.recv(stream.grpc_stream)
-    |> Stream.flat_map(&(&1.received_messages))
-    |> Stream.map(&Message.new/1)
+    |> Stream.map(fn response ->
+      response.received_messages
+      |> Enum.map(&Message.new/1)
+    end)
   end
 end
