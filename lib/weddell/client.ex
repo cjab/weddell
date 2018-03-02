@@ -1,4 +1,6 @@
 defmodule Weddell.Client do
+  require Logger
+
   @moduledoc """
   A persistent process responsible for interacting with Pusub over GRPC.
   """
@@ -169,12 +171,20 @@ defmodule Weddell.Client do
 
   defp auth_header do
     if Code.ensure_compiled?(Goth.Token) do
-      {:ok, %{token: token, type: token_type}} =
-        Goth.Token.for_scope("https://www.googleapis.com/auth/pubsub")
-      %{"authorization" => "#{token_type} #{token}"}
+      case Goth.Token.for_scope("https://www.googleapis.com/auth/pubsub") do
+        {:ok, %{token: token, type: token_type}} ->
+          %{"authorization" => "#{token_type} #{token}"}
+        _ ->
+          %{}
+      end
     else
       %{}
     end
+  rescue
+    # FIXME: This is an ugly way to handle bad gcp credentials
+    _ in MatchError ->
+      Logger.warn("Bad GCP Credentials, could not retrieve token")
+      %{}
   end
 
   defp ssl_opts(opts) do
