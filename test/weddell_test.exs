@@ -14,7 +14,7 @@ defmodule WeddellTest do
 
     test "fail to create duplicate topic" do
       topic = "test-topic-#{UUID.uuid4()}"
-      error = %RPCError{message: "Topic already exists", status: "6"}
+      error = %RPCError{message: "Topic already exists", status: 6}
       assert :ok == Weddell.create_topic(topic)
       assert {:error, error} == Weddell.create_topic(topic)
     end
@@ -32,7 +32,7 @@ defmodule WeddellTest do
     end
 
     test "fail to delete a topic" do
-      error = %RPCError{message: "Topic not found", status: "5"}
+      error = %RPCError{message: "Topic not found", status: 5}
       assert {:error, error} == Weddell.delete_topic("test-topic-not-found")
     end
   end
@@ -63,7 +63,7 @@ defmodule WeddellTest do
 
     test "fail to create duplicate subscription", %{topic: topic} do
       subscription = "test-subscription-#{UUID.uuid4()}"
-      error = %RPCError{message: "Subscription already exists", status: "6"}
+      error = %RPCError{message: "Subscription already exists", status: 6}
       assert :ok == Weddell.create_subscription(subscription, topic)
       assert {:error, error} == Weddell.create_subscription(subscription, topic)
     end
@@ -83,7 +83,7 @@ defmodule WeddellTest do
     end
 
     test "fail to delete a subscription" do
-      error = %RPCError{message: "Subscription does not exist", status: "5"}
+      error = %RPCError{message: "Subscription does not exist", status: 5}
       assert {:error, error} == Weddell.delete_subscription("test-subscription-not-found")
     end
   end
@@ -139,7 +139,7 @@ defmodule WeddellTest do
     end
 
     test "fail without data or attributes", %{topic: topic} do
-      error = %RPCError{message: "Some messages are empty", status: "3"}
+      error = %RPCError{message: "Some messages are empty", status: 3}
       assert {:error, error} == Weddell.publish(nil, topic)
     end
   end
@@ -163,7 +163,7 @@ defmodule WeddellTest do
     end
 
     test "fail to pull a message from an invalid subscription" do
-      assert {:error, %RPCError{message: "Subscription does not exist", status: "5"}} =
+      assert {:error, %RPCError{message: "Subscription does not exist", status: 5}} =
         Weddell.pull("test-subscription-#{UUID.uuid4()}")
     end
   end
@@ -187,7 +187,7 @@ defmodule WeddellTest do
     end
 
     test "fail to ack a message from an invalid subscription", %{message: message} do
-      assert {:error, %RPCError{message: "Subscription does not exist", status: "5"}} =
+      assert {:error, %RPCError{message: "Subscription does not exist", status: 5}} =
         Weddell.acknowledge(message, "test-subscription-#{UUID.uuid4()}")
     end
   end
