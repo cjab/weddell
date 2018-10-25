@@ -32,36 +32,33 @@ defmodule Weddell.Consumer do
       end
 
       def init(subscription) do
-        stream =
-          Weddell.client()
-          |> Subscriber.Stream.open(subscription)
-        GenServer.cast(self(), :listen)
-        {:ok, stream}
+        GenServer.cast self(), :listen
+
+        {:ok, subscription}
       end
 
-      def handle_cast(:listen, stream) do
+      def handle_cast(:listen, subscription) do
+        stream = new_stream(subscription)
+
         stream
         |> Subscriber.Stream.recv()
         |> Enum.each(fn messages ->
-          Logger.debug fn ->
-            {"Dispatching messages", count: length(messages)}
-          end
-          dispatch(messages, stream)
-        end)
-        {:stop, :stream_closed, stream}
+             dispatch(messages, stream)
+           end)
+
+        GenServer.cast self(), :listen
+
+        {:noreply, subscription}
+      end
+
+      defp new_stream(subscription) do
+        Weddell.client()
+        |> Subscriber.Stream.open(subscription)
       end
 
       defp dispatch(messages, stream) do
         case handle_messages(messages) do
           {:ok, opts} ->
-            Logger.debug fn ->
-              ack = Keyword.get(opts, :ack, [])
-              delay = Keyword.get(opts, :delay, [])
-              {"Sending message response",
-                ack_count: length(ack),
-                delay_count: length(delay),
-                no_response_count: length(messages) - length(ack) + length(delay)}
-            end
             stream
             |> Subscriber.Stream.send(opts)
         end
