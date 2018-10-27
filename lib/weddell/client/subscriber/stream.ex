@@ -40,7 +40,7 @@ defmodule Weddell.Client.Subscriber.Stream do
       StreamingPullRequest.new(subscription: Util.full_subscription(client.project, subscription),
                                stream_ack_deadline_seconds: @default_ack_deadline)
     stream.grpc_stream
-    |> GRPCStub.stream_send(request)
+    |> GRPCStub.send_request(request)
     stream
   end
 
@@ -59,7 +59,7 @@ defmodule Weddell.Client.Subscriber.Stream do
     request =
       StreamingPullRequest.new(
         subscription: Util.full_subscription(stream.client.project, stream.subscription))
-    GRPCStub.stream_send(stream.grpc_stream, request, end_stream: true)
+    GRPCStub.send_request(stream.grpc_stream, request, end_stream: true)
   end
 
   @typedoc "A message and a new deadline in seconds"
@@ -115,7 +115,7 @@ defmodule Weddell.Client.Subscriber.Stream do
         modify_deadline_ack_ids: deadline_ack_ids,
         modify_deadline_seconds: deadline_seconds,
         stream_ack_deadline_seconds: stream_deadline)
-    GRPCStub.stream_send(stream.grpc_stream, request)
+    GRPCStub.send_request(stream.grpc_stream, request)
   end
 
   @doc """
@@ -132,10 +132,16 @@ defmodule Weddell.Client.Subscriber.Stream do
   """
   @spec recv(stream :: t) :: Enumerable.t
   def recv(stream) do
-    GRPCStub.recv(stream.grpc_stream)
-    |> Stream.map(fn response ->
-      response.received_messages
-      |> Enum.map(&Message.new/1)
-    end)
+    case GRPCStub.recv(stream.grpc_stream) do
+      {:ok, recv} ->
+        recv
+        |> Stream.map(fn reply ->
+          case reply do
+            {:ok, response} -> Enum.map(response.received_messages, &Message.new/1)
+            {:error, _} -> []
+          end
+        end)
+      {:error, _} -> []
+    end
   end
 end
