@@ -135,13 +135,14 @@ defmodule Weddell.Client.Subscriber.Stream do
     case GRPCStub.recv(stream.grpc_stream) do
       {:ok, recv} ->
         recv
-        |> Stream.map(fn reply ->
-          case reply do
-            {:ok, response} -> Enum.map(response.received_messages, &Message.new/1)
-            {:error, _} -> []
-          end
+        |> Stream.map(fn
+          {:ok, response} ->
+            {:ok, Enum.map(response.received_messages, &Message.new/1)}
+          {:error, _} = error ->
+            error
         end)
-      {:error, _} -> []
+      {:error, _} = error ->
+        error
     end
   end
 end
