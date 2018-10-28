@@ -1,6 +1,4 @@
 defmodule Weddell.Consumer do
-  alias GRPC.RPCError
-
   alias Weddell.{Message,
                  Client.Subscriber}
 
@@ -18,8 +16,6 @@ defmodule Weddell.Consumer do
     quote do
       require Logger
       @behaviour Weddell.Consumer
-
-      @deadline_expired 4
 
       def child_spec(subscription) do
         %{
@@ -46,22 +42,7 @@ defmodule Weddell.Consumer do
 
         stream
         |> Subscriber.Stream.recv()
-        |> case do
-          {:error, e} = error ->
-            Logger.error(e)
-            error
-          batches ->
-            Enum.each(batches, fn
-              {:ok, messages} ->
-                dispatch(messages, stream)
-              {:error, %RPCError{status: @deadline_expired} = error} ->
-                # Deadline expired and stream ended, this is expected
-                []
-              {:error, e} = error ->
-                Logger.error(e)
-                error
-            end)
-        end
+        |> Enum.each(&(dispatch(&1, stream)))
 
         GenServer.cast self(), :listen
 
