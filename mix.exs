@@ -47,7 +47,7 @@ defmodule Weddell.Mixfile do
       {:dialyxir, "~> 0.5", only: [:dev], runtime: false},
 
       # Docs
-      {:ex_doc, "~> 0.16", only: :docs},
+      {:ex_doc, "~> 0.16", only: [:docs, :dev]},
       {:inch_ex, ">= 0.0.0", only: :docs},
     ]
   end
