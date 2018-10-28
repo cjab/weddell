@@ -18,5 +18,5 @@
   "protobuf": {:hex, :protobuf, "0.5.4", "2e1b8eec211aff034ad8a14e3674220b0158bfb9a3c7128ac9d2a1ed1b3724d3", [:mix], [], "hexpm"},
   "ranch": {:hex, :ranch, "1.6.2", "6db93c78f411ee033dbb18ba8234c5574883acb9a75af0fb90a9b82ea46afa00", [:rebar3], [], "hexpm"},
   "uuid": {:hex, :uuid, "1.1.8", "e22fc04499de0de3ed1116b770c7737779f226ceefa0badb3592e64d5cfb4eb9", [:mix], [], "hexpm"},
-  "wait_for_it": {:git, "https://github.com/cjab/wait_for_it.git", "e7e82c3a40b215b3e89ca715c04757249bdfd739", [branch: "update-ex-doc"]},
+  "wait_for_it": {:hex, :wait_for_it, "1.1.1", "973c3beb9e3d8371796a09985ede4a4c396050325ea6dc3b835e0fd481595721", [:mix], [], "hexpm"},
 }

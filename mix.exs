@@ -41,7 +41,7 @@ defmodule Weddell.Mixfile do
       {:mox, "~> 0.3", only: :test},
       {:apex, "~> 1.2", only: [:test, :dev]},
       {:uuid, "~> 1.1", only: :test},
-      {:wait_for_it, github: "cjab/wait_for_it", branch: "update-ex-doc", only: :test},
+      {:wait_for_it, "~> 1.1", only: :test},
       {:dialyxir, "~> 0.5", only: [:dev], runtime: false},
 
       # Docs
