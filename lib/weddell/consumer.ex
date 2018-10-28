@@ -42,9 +42,7 @@ defmodule Weddell.Consumer do
 
         stream
         |> Subscriber.Stream.recv()
-        |> Enum.each(fn messages ->
-             dispatch(messages, stream)
-           end)
+        |> Enum.each(&(dispatch(&1, stream)))
 
         GenServer.cast self(), :listen
 
