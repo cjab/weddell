@@ -36,7 +36,7 @@ defmodule Weddell.Mixfile do
     [
       # GRPC
       {:protobuf, "~> 0.5"},
-      {:grpc, github: "tony612/grpc-elixir", branch: :master},
+      {:grpc, "~> 0.3.0-alpha.2"},
       {:certifi, "~> 2.0"},
 
       # Testing
