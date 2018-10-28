@@ -1,10 +1,12 @@
 defmodule Weddell.Mixfile do
   use Mix.Project
 
+  @version "0.1.0-alpha.1"
+
   def project do
     [
       app: :weddell,
-      version: "0.1.0",
+      version: @version,
       elixir: "~> 1.5",
       elixirc_paths: elixirc_paths(Mix.env),
       start_permanent: Mix.env == :prod,
