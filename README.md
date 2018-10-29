@@ -1,9 +1,11 @@
 # Weddell
 
 [![Build Status](https://travis-ci.org/cjab/weddell.svg?branch=master)](https://travis-ci.org/cjab/weddell)
-[![Inline docs](http://inch-ci.org/github/cjab/weddell.svg)](http://inch-ci.org/github/cjab/weddell)
+[![Inline docs](https://inch-ci.org/github/cjab/weddell.svg)](https://inch-ci.org/github/cjab/weddell)
 
 Weddell is an Elixir client for [Google Pub/Sub](https://cloud.google.com/pubsub/).
+
+[Documentation](https://hexdocs.pm/weddell)
 
 ## Installation
 
@@ -12,8 +14,8 @@ Weddell is an Elixir client for [Google Pub/Sub](https://cloud.google.com/pubsub
 ```elixir
 def deps do
   [
-    {:weddell, github: "cjab/weddell"},
-    {:goth, "~> 0.7"},
+    {:weddell, "~> 0.1.0-alpha.1"},
+    {:goth, "~> 0.11.0"},
   ]
 end
 ```

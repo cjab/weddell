@@ -15,7 +15,7 @@ defmodule Weddell.Mixfile do
       name: "Weddell",
       description: description(),
       source_url: "https://github.com/cjab/weddell",
-      docs: [main: "README",
+      docs: [main: "readme",
              extras: ["README.md"]]
     ]
   end
@@ -40,15 +40,15 @@ defmodule Weddell.Mixfile do
       {:certifi, "~> 2.0"},
 
       # Testing
-      {:mox, "~> 0.3", only: :test},
-      {:apex, "~> 1.2", only: [:test, :dev]},
+      {:mox, "~> 0.4", only: :test},
       {:uuid, "~> 1.1", only: :test},
       {:wait_for_it, "~> 1.1", only: :test},
-      {:dialyxir, "~> 0.5", only: [:dev], runtime: false},
+      {:apex, "~> 1.2", only: [:test, :dev]},
 
-      # Docs
-      {:ex_doc, "~> 0.16", only: [:docs, :dev]},
-      {:inch_ex, ">= 0.0.0", only: :docs},
+      # Dev
+      {:ex_doc, "~> 0.18", only: :dev},
+      {:inch_ex, ">= 0.0.0", only: :dev},
+      {:dialyxir, "~> 0.5", only: :dev, runtime: false},
     ]
   end
 
