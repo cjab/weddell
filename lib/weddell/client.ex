@@ -125,15 +125,18 @@ defmodule Weddell.Client do
     host = Keyword.get(opts, :host, @default_host)
     port = Keyword.get(opts, :port, @default_port)
     {:ok, channel} =
-      Stub.connect("#{host}:#{port}", cred: cred)
+      Stub.connect("#{host}:#{port}", cred: cred, adapter_opts: %{
+        http2_opts: %{keepalive: :infinity}
+      })
     {:ok, %__MODULE__{channel: channel,
                       project: project}}
   end
 
   @doc false
   @spec request_opts() :: Keyword.t
-  def request_opts() do
+  def request_opts(extra_opts \\ []) do
     [metadata: auth_header(), content_type: "application/grpc"]
+    |> Enum.concat(extra_opts)
   end
 
   @doc false
