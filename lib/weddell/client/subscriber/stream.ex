@@ -3,6 +3,7 @@ defmodule Weddell.Client.Subscriber.Stream do
   A streaming connection to a subscription.
   """
   alias GRPC.Client.Stream, as: GRPCStream
+  alias GRPC.RPCError
   alias GRPC.Stub, as: GRPCStub
   alias Google.Pubsub.V1.{Subscriber.Stub,
                           StreamingPullRequest}
@@ -17,6 +18,7 @@ defmodule Weddell.Client.Subscriber.Stream do
   defstruct [:client, :subscription, :grpc_stream]
 
   @default_ack_deadline 10
+  @unavailable 14
 
   @doc """
   Open a new stream on a subscription.
@@ -138,6 +140,8 @@ defmodule Weddell.Client.Subscriber.Stream do
         |> Stream.map(fn
           {:ok, response} ->
             Enum.map(response.received_messages, &Message.new/1)
+          {:error, %RPCError{status: @unavailable}} ->
+            []
           {:error, e} ->
             raise e
         end)
