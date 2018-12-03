@@ -18,7 +18,7 @@ defmodule Weddell.Client.Subscriber.Stream do
   defstruct [:client, :subscription, :grpc_stream]
 
   @default_ack_deadline 10
-  @deadline_expired 4
+  @unavailable 14
 
   @doc """
   Open a new stream on a subscription.
@@ -37,7 +37,7 @@ defmodule Weddell.Client.Subscriber.Stream do
     stream =
       %__MODULE__{client: client,
                   subscription: subscription,
-                  grpc_stream: Stub.streaming_pull(client.channel, Client.request_opts())}
+                  grpc_stream: Stub.streaming_pull(client.channel, Client.request_opts(timeout: :infinity))}
     request =
       StreamingPullRequest.new(subscription: Util.full_subscription(client.project, subscription),
                                stream_ack_deadline_seconds: @default_ack_deadline)
@@ -134,14 +134,13 @@ defmodule Weddell.Client.Subscriber.Stream do
   """
   @spec recv(stream :: t) :: Enumerable.t
   def recv(stream) do
-    case GRPCStub.recv(stream.grpc_stream) do
+    case GRPCStub.recv(stream.grpc_stream, timeout: :infinity) do
       {:ok, recv} ->
         recv
         |> Stream.map(fn
           {:ok, response} ->
             Enum.map(response.received_messages, &Message.new/1)
-          {:error, %RPCError{status: @deadline_expired}} ->
-            # Deadline expired and stream ended, this is expected
+          {:error, %RPCError{status: @unavailable}} ->
             []
           {:error, e} ->
             raise e
