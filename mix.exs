@@ -1,7 +1,7 @@
 defmodule Weddell.Mixfile do
   use Mix.Project
 
-  @version "0.1.0-alpha.1"
+  @version "0.1.1-alpha.1"
 
   def project do
     [
