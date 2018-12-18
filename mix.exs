@@ -1,7 +1,7 @@
 defmodule Weddell.Mixfile do
   use Mix.Project
 
-  @version "0.1.1-alpha.1"
+  @version "0.1.2"
 
   def project do
     [
@@ -36,7 +36,7 @@ defmodule Weddell.Mixfile do
     [
       # GRPC
       {:protobuf, "~> 0.5"},
-      {:grpc, "~> 0.3.0-alpha.2"},
+      {:grpc, "~> 0.3"},
       {:certifi, "~> 2.0"},
 
       # Testing
@@ -46,7 +46,7 @@ defmodule Weddell.Mixfile do
       {:apex, "~> 1.2", only: [:test, :dev]},
 
       # Dev
-      {:ex_doc, "~> 0.18", only: :dev},
+      {:ex_doc, "~> 0.19", only: :dev},
       {:inch_ex, ">= 0.0.0", only: :dev},
       {:dialyxir, "~> 0.5", only: :dev, runtime: false},
     ]

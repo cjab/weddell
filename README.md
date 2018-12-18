@@ -14,8 +14,8 @@ Weddell is an Elixir client for [Google Pub/Sub](https://cloud.google.com/pubsub
 ```elixir
 def deps do
   [
-    {:weddell, "~> 0.1.1-alpha.1"},
-    {:goth, "~> 0.11.0"},
+    {:weddell, "~> 0.1"},
+    {:goth, "~> 0.11"},
   ]
 end
 ```
