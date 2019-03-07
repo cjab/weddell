@@ -19,6 +19,7 @@ defmodule Weddell.Client.Subscriber.Stream do
 
   @default_ack_deadline 10
   @unavailable 14
+  @unknown 2
 
   @doc """
   Open a new stream on a subscription.
@@ -140,13 +141,27 @@ defmodule Weddell.Client.Subscriber.Stream do
         |> Stream.map(fn
           {:ok, response} ->
             Enum.map(response.received_messages, &Message.new/1)
+
           {:error, %RPCError{status: @unavailable}} ->
             []
+
+          {:error, %RPCError{status: @unknown, message: message} = e} ->
+            if expected_error?(message), do: [], else: raise e
+
           {:error, e} ->
             raise e
         end)
+
+      {:error, %RPCError{status: @unknown, message: message} = e} ->
+        if expected_error?(message), do: [], else: raise e
+
       {:error, e} ->
         raise e
     end
+  end
+
+  def expected_error?(message) do
+    Regex.match?(~r/goaway.*max_age/, message) ||
+      Regex.match?(~r/stream_error.*Stream reset by server/, message)
   end
 end
