@@ -32,21 +32,49 @@ defmodule Weddell.Consumer do
       end
 
       def init(subscription) do
-        GenServer.cast self(), :listen
+        schedule_listen()
 
         {:ok, subscription}
       end
 
-      def handle_cast(:listen, subscription) do
+      def handle_info(:listen, subscription) do
         stream = new_stream(subscription)
 
         stream
         |> Subscriber.Stream.recv()
         |> Enum.each(&(dispatch(&1, stream)))
 
-        GenServer.cast self(), :listen
+        Subscriber.Stream.close(stream)
+
+        schedule_listen()
 
         {:noreply, subscription}
+      end
+
+      def handle_info(
+        {:gun_error, _, _, {:stream_error, :no_error, _}},
+        subscription
+      ) do
+        # Error: Stream reset by server.
+        {:stop, :shutdown, subscription}
+      end
+
+      def handle_info(
+        {:gun_error, _, _, {:badstate, _}},
+        subscription
+      ) do
+        # Error: The stream cannot be found.
+        {:stop, :shutdown, subscription}
+      end
+
+      def handle_info(type, subscription) do
+        Logger.debug "Weddell.Consumer - handle_info/2 unhandled - #{inspect(type)}"
+
+        {:stop, :unknown, subscription}
+      end
+
+      defp schedule_listen do
+        Process.send_after(self(), :listen, 100)
       end
 
       defp new_stream(subscription) do
