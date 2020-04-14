@@ -249,7 +249,7 @@ defmodule Weddell do
       Weddell.acknowledge(messages, "foo-subscription")
       #=> :ok
   """
-  @spec acknowledge(messages :: [Message.t] | message :: Message.t,
+  @spec acknowledge(messages :: [Message.t] |  Message.t,
                     subscription_name :: String.t) :: :ok | error
   def acknowledge(messages, subscription) do
     GenServer.call(Weddell.Client, {:acknowledge, messages, subscription})

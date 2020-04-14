@@ -173,7 +173,7 @@ defmodule Weddell.Client do
   end
 
   defp auth_header do
-    if Code.ensure_compiled?(Goth.Token) do
+    if Code.ensure_compiled?(Goth.Token) and not Application.get_env(:goth, :disabled, false) do
       case Goth.Token.for_scope("https://www.googleapis.com/auth/pubsub") do
         {:ok, %{token: token, type: token_type}} ->
           %{"authorization" => "#{token_type} #{token}"}
