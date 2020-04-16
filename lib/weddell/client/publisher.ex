@@ -18,8 +18,8 @@ defmodule Weddell.Client.Publisher do
   @default_list_max 50
 
   @typedoc "A new Pub/Sub message -- can contain data, attributes, or both"
-  @type new_message :: data :: binary |
-                       attributes :: map |
+  @type new_message :: (data :: binary) |
+                       (attributes :: map) |
                        {data :: binary, attributes :: map}
 
   defp stub_module do
