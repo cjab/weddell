@@ -1,13 +1,36 @@
 defmodule Weddell.Client.Util do
   @moduledoc false
 
+  @subscription_regex ~r/projects\/.+\/subscriptions\/.+/
+  @topics_regex ~r/projects\/.+\/topics\/.+/
+
   @spec full_subscription(project :: String.t, subscription :: String.t) :: String.t
+  def full_subscription(project, "projects/" <> _ = name) do
+    case Regex.match?(@subscription_regex, name) do
+      true  -> name
+      false -> make_full_subscription(project, name)
+    end
+  end
   def full_subscription(project, name) do
+    make_full_subscription(project, name)
+  end
+
+  defp make_full_subscription(project, name) do
     "#{full_project(project)}/subscriptions/#{name}"
   end
 
   @spec full_topic(project :: String.t, topic :: String.t) :: String.t
+  def full_topic(project, "projects/" <> _ = name) do
+    case Regex.match?(@topics_regex, name) do
+      true  -> name
+      false -> make_full_topic(project, name)
+    end
+  end
   def full_topic(project, name) do
+    make_full_topic(project, name)
+  end
+
+  defp make_full_topic(project, name) do
     "#{full_project(project)}/topics/#{name}"
   end
 

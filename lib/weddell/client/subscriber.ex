@@ -64,7 +64,7 @@ defmodule Weddell.Client.Subscriber do
   def subscriptions(client, opts \\ []) do
     max_topics = Keyword.get(opts, :max, @default_list_max)
     cursor = Keyword.get(opts, :cursor, "")
-    request = ListSubscriptionsRequest.new(project: "projects/#{client.project}",
+    request = ListSubscriptionsRequest.new(project: Util.full_project(client.project),
                                     page_size: max_topics,
                                     page_token: cursor)
     client.channel

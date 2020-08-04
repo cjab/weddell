@@ -55,7 +55,7 @@ defmodule Weddell.Client.Publisher do
   def topics(client, opts \\ []) do
     max_topics = Keyword.get(opts, :max, @default_list_max)
     cursor = Keyword.get(opts, :cursor, "")
-    request = ListTopicsRequest.new(project: "projects/#{client.project}",
+    request = ListTopicsRequest.new(project: Util.full_project(client.project),
                                     page_size: max_topics,
                                     page_token: cursor)
     client.channel
