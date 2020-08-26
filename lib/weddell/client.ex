@@ -87,12 +87,17 @@ defmodule Weddell.Client do
       _(default: [:cacerts: :certifi.cacerts()])_
   """
   def start_link do
-    GenServer.start_link(__MODULE__, :ok, name: __MODULE__)
+    project = Application.get_env(:weddell, :project)
+    options = Application.get_all_env(:weddell)
+    start_link(project, options, name: __MODULE__)
   end
 
-  def init(:ok) do
-    connect(Application.get_env(:weddell, :project),
-            Application.get_all_env(:weddell))
+  def start_link(project, options, gen_server_options \\ []) do
+    GenServer.start_link(__MODULE__, [project, options], gen_server_options)
+  end
+
+  def init([project, options]) do
+    connect(project, options)
   end
 
   @doc """

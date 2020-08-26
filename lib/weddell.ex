@@ -18,7 +18,10 @@ defmodule Weddell do
   """
   def start(_type, _args) do
     import Supervisor.Spec
-    children = [worker(Client, [])]
+    children = case Application.get_env(:weddell, :no_connect_on_start, false) do
+      true -> []
+      false -> [worker(Client, [])]
+    end
     opts = [strategy: :one_for_one, name: __MODULE__]
     Supervisor.start_link(children, opts)
   end
