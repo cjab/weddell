@@ -31,7 +31,7 @@ defmodule Weddell do
   """
   @spec client(timeout :: integer()) :: Client.t
   def client(timeout \\ 5000) do
-    GenServer.call(Weddell.Client, {:client}, timeout)
+    Weddell.Client.client(Weddell.Client, timeout)
   end
 
   @doc """
@@ -43,7 +43,7 @@ defmodule Weddell do
   """
   @spec create_topic(topic_name :: String.t, timeout :: integer()) :: :ok | error
   def create_topic(name, timeout \\ 5000) do
-    GenServer.call(Weddell.Client, {:create_topic, name}, timeout)
+    Weddell.Client.create_topic(Weddell.Client, name, timeout)
   end
 
   @doc """
@@ -55,7 +55,7 @@ defmodule Weddell do
   """
   @spec delete_topic(topic_name :: String.t, timeout :: integer()) :: :ok | error
   def delete_topic(name, timeout \\ 5000) do
-    GenServer.call(Weddell.Client, {:delete_topic, name}, timeout)
+    Weddell.Client.delete_topic(Weddell.Client, name, timeout)
   end
 
   @doc """
@@ -84,7 +84,7 @@ defmodule Weddell do
     {:ok, topic_names :: [String.t], Client.cursor} |
     error
   def topics(opts \\ [], timeout \\ 5000) do
-    GenServer.call(Weddell.Client, {:topics, opts}, timeout)
+    Weddell.Client.topics(Weddell.Client, opts, timeout)
   end
 
   @doc """
@@ -113,7 +113,7 @@ defmodule Weddell do
                             timeout :: integer()) ::
     :ok | error
   def create_subscription(name, topic, opts \\ [], timeout \\ 5000) do
-    GenServer.call(Weddell.Client, {:create_subscription, name, topic, opts}, timeout)
+    Weddell.Client.create_subscription(Weddell.Client, name, topic, opts, timeout)
   end
 
   @doc """
@@ -126,7 +126,7 @@ defmodule Weddell do
   @spec delete_subscription(subscription_name :: String.t, timeout :: integer()) ::
     :ok | error
   def delete_subscription(name, timeout \\ 5000) do
-    GenServer.call(Weddell.Client, {:delete_subscription, name}, timeout)
+    Weddell.Client.delete_subscription(Weddell.Client, name, timeout)
   end
 
   @doc """
@@ -155,7 +155,7 @@ defmodule Weddell do
     {:ok, subscriptions :: [SubscriptionDetails.t], Client.cursor} |
     error
   def subscriptions(opts \\ [], timeout \\ 5000) do
-    GenServer.call(Weddell.Client, {:subscriptions, opts}, timeout)
+    Weddell.Client.subscriptions(Weddell.Client, opts, timeout)
   end
 
   @doc """
@@ -186,7 +186,7 @@ defmodule Weddell do
     {:ok, subscriptions :: [String.t], Client.cursor} |
     error
   def topic_subscriptions(topic, opts \\ [], timeout \\ 5000) do
-    GenServer.call(Weddell.Client, {:topic_subscriptions, topic, opts}, timeout)
+    Weddell.Client.topic_subscriptions(Weddell.Client, topic, opts, timeout)
   end
 
   @doc """
@@ -224,7 +224,7 @@ defmodule Weddell do
                 timeout :: integer()) ::
     :ok | error
   def publish(messages, topic, timeout \\ 5000) do
-    GenServer.call(Weddell.Client, {:publish, messages, topic}, timeout)
+    Weddell.Client.publish(Weddell.Client, messages, topic, timeout)
   end
 
   @doc """
@@ -248,7 +248,7 @@ defmodule Weddell do
              timeout :: integer()) ::
     {:ok, messages :: [Message.t]} | error
   def pull(subscription, opts \\ [], timeout \\ 5000) do
-    GenServer.call(Weddell.Client, {:pull, subscription, opts}, timeout)
+    Weddell.Client.pull(Weddell.Client, subscription, opts, timeout)
   end
 
   @doc """
@@ -265,6 +265,6 @@ defmodule Weddell do
                     timeout :: integer()) ::
     :ok | error
   def acknowledge(messages, subscription, timeout \\ 5000) do
-    GenServer.call(Weddell.Client, {:acknowledge, messages, subscription}, timeout)
+    Weddell.Client.acknowledge(Weddell.Client, messages, subscriptions, timeout)
   end
 end

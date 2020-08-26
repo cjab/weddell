@@ -96,6 +96,94 @@ defmodule Weddell.Client do
     GenServer.start_link(__MODULE__, [project, options], gen_server_options)
   end
 
+  @spec client(server :: GenServer.server(), timeout :: integer()) :: Client.t
+  def client(server, timeout \\ 5000) do
+    GenServer.call(server, {:client}, timeout)
+  end
+
+  @spec create_topic(server :: GenServer.server(), topic_name :: String.t, timeout :: integer()) :: :ok | error
+  def create_topic(server, name, timeout \\ 5000) do
+    GenServer.call(server, {:create_topic, name}, timeout)
+  end
+
+  @spec delete_topic(server :: GenServer.server(), topic_name :: String.t, timeout :: integer()) :: :ok | error
+  def delete_topic(server, name, timeout \\ 5000) do
+    GenServer.call(server, {:delete_topic, name}, timeout)
+  end
+
+  @spec topics(server :: GenServer.server(), opts :: Client.list_options, timeout :: integer()) ::
+    {:ok, topic_names :: [String.t]} |
+    {:ok, topic_names :: [String.t], Client.cursor} |
+    error
+  def topics(server, opts \\ [], timeout \\ 5000) do
+    GenServer.call(server, {:topics, opts}, timeout)
+  end
+
+  @spec create_subscription(server :: GenServer.server(),
+                            subscription_name :: String.t,
+                            topic_name :: String.t,
+                            Client.subscription_options,
+                            timeout :: integer()) ::
+    :ok | error
+  def create_subscription(server, name, topic, opts \\ [], timeout \\ 5000) do
+    GenServer.call(server, {:create_subscription, name, topic, opts}, timeout)
+  end
+
+  @spec delete_subscription(server :: GenServer.server(),
+                            subscription_name :: String.t,
+                            timeout :: integer()) ::
+    :ok | error
+  def delete_subscription(server, name, timeout \\ 5000) do
+    GenServer.call(server, {:delete_subscription, name}, timeout)
+  end
+
+  @spec subscriptions(server :: GenServer.server(),
+                      opts :: Client.list_options,
+                      timeout :: integer()) ::
+    {:ok, subscriptions :: [SubscriptionDetails.t]} |
+    {:ok, subscriptions :: [SubscriptionDetails.t], Client.cursor} |
+    error
+  def subscriptions(server, opts \\ [], timeout \\ 5000) do
+    GenServer.call(server, {:subscriptions, opts}, timeout)
+  end
+
+  @spec topic_subscriptions(server :: GenServer.server(),
+                            topic :: String.t,
+                            opts :: Client.list_options,
+                            timeout :: integer()) ::
+    {:ok, subscriptions :: [String.t]} |
+    {:ok, subscriptions :: [String.t], Client.cursor} |
+    error
+  def topic_subscriptions(server, topic, opts \\ [], timeout \\ 5000) do
+    GenServer.call(server, {:topic_subscriptions, topic, opts}, timeout)
+  end
+
+  @spec publish(server :: GenServer.server(),
+                Publisher.new_message | [Publisher.new_message],
+                topic_name :: String.t,
+                timeout :: integer()) ::
+    :ok | error
+  def publish(server, messages, topic, timeout \\ 5000) do
+    GenServer.call(server, {:publish, messages, topic}, timeout)
+  end
+
+  @spec pull(server :: GenServer.server(),
+             subscription_name :: String.t, Client.pull_options,
+             timeout :: integer()) ::
+    {:ok, messages :: [Message.t]} | error
+  def pull(server, subscription, opts \\ [], timeout \\ 5000) do
+    GenServer.call(server, {:pull, subscription, opts}, timeout)
+  end
+
+  @spec acknowledge(server :: GenServer.server(),
+                    messages :: [Message.t] |  Message.t,
+                    subscription_name :: String.t,
+                    timeout :: integer()) ::
+    :ok | error
+  def acknowledge(server, messages, subscription, timeout \\ 5000) do
+    GenServer.call(server, {:acknowledge, messages, subscription}, timeout)
+  end
+
   def init([project, options]) do
     connect(project, options)
   end

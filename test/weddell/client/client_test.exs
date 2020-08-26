@@ -16,7 +16,7 @@ defmodule Weddell.ClientTest do
     test "starts with a client by default" do
       nil = GenServer.whereis(Weddell.Client)
       Application.start(:weddell)
-      pid = GenServer.whereis(Weddell.Client)
+      pid = wait_for_server(Weddell.Client, 100)
       true = is_pid(pid)
       %Weddell.Client{} = Weddell.client()
     end
@@ -25,6 +25,9 @@ defmodule Weddell.ClientTest do
       Application.put_env(:weddell, :no_connect_on_start, true)
       nil = GenServer.whereis(Weddell.Client)
       Application.start(:weddell)
+      # assert_raise
+      nil = wait_for_server(Weddell.Client, 100)
+      assert {:noproc, _} = catch_exit(Weddell.client())
       nil = GenServer.whereis(Weddell.Client)
     end
 
@@ -41,4 +44,18 @@ defmodule Weddell.ClientTest do
       %Weddell.Client{} = GenServer.call(:my_client, {:client})
     end
   end
+
+  defp wait_for_server(server, 0) do
+    nil
+  end
+  defp wait_for_server(server, timeout) do
+    case GenServer.whereis(server) do
+      nil ->
+        :timer.sleep(10)
+        wait_for_server(server, timeout - 10)
+      pid ->
+        pid
+    end
+  end
+
 end
