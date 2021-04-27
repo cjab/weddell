@@ -1,8 +1,7 @@
 defmodule Weddell.ClientTest do
   use ExUnit.Case
 
-  alias Weddell.{PublisherStubMock,
-                 SubscriberStubMock}
+  alias Weddell.{PublisherStubMock, SubscriberStubMock}
 
   setup do
     Application.stop(:weddell)
@@ -11,8 +10,7 @@ defmodule Weddell.ClientTest do
     Application.put_env(:weddell, :project, "weddell")
   end
 
-  describe "Weddel application" do
-
+  describe "Weddell application" do
     test "starts with a client by default" do
       nil = GenServer.whereis(Weddell.Client)
       Application.start(:weddell)
@@ -35,10 +33,14 @@ defmodule Weddell.ClientTest do
       Application.put_env(:weddell, :no_connect_on_start, true)
       nil = GenServer.whereis(Weddell.Client)
       Application.start(:weddell)
-      {:ok, pid} = Weddell.Client.start_link(
-        "myproject",
-        Application.get_all_env(:weddell),
-        [name: :my_client])
+
+      {:ok, pid} =
+        Weddell.Client.start_link(
+          "myproject",
+          Application.get_all_env(:weddell),
+          name: :my_client
+        )
+
       true = is_pid(pid)
 
       %Weddell.Client{} = GenServer.call(:my_client, {:client})
@@ -48,14 +50,15 @@ defmodule Weddell.ClientTest do
   defp wait_for_server(server, 0) do
     nil
   end
+
   defp wait_for_server(server, timeout) do
     case GenServer.whereis(server) do
       nil ->
         :timer.sleep(10)
         wait_for_server(server, timeout - 10)
+
       pid ->
         pid
     end
   end
-
 end
