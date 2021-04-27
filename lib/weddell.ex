@@ -272,6 +272,6 @@ defmodule Weddell do
         ) ::
           :ok | error
   def acknowledge(messages, subscription, timeout \\ 5000) do
-    Weddell.Client.acknowledge(Weddell.Client, messages, subscriptions, timeout)
+    Weddell.Client.acknowledge(Weddell.Client, messages, subscription, timeout)
   end
 end
