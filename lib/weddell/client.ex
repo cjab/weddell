@@ -86,6 +86,8 @@ defmodule Weddell.Client do
     * `ssl` - SSL settings to be used when connecting with the `:https` scheme. See `ssl_option()`
       in the [ssl documentation] (http://erlang.org/doc/man/ssl.html).
       _(default: [:cacerts: :certifi.cacerts()])_
+    * `no_connect_on_start` - By default Weddell will start a client and connect on application start.
+      When `true` a client will not be started. Clients can then be started with `Weddell.Client.start_link/3`. _(default: false)_
   """
   def start_link do
     project = Application.get_env(:weddell, :project)

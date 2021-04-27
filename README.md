@@ -29,6 +29,10 @@ config :goth,
   json: {:system, "GCP_CREDENTIALS_JSON"}
 ```
 
+By default Weddell will start a client and connect on application start.
+This can be disabled by setting `:no_connect_on_start` in the application config.
+Clients can then be started with `Weddell.Client.start_link/3`.
+
 ## Getting Started
 
 ### Creating a topic and subscription
