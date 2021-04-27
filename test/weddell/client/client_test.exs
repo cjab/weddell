@@ -8,6 +8,7 @@ defmodule Weddell.ClientTest do
     Application.put_env(:weddell, :publisher_stub, PublisherStubMock)
     Application.put_env(:weddell, :subscriber_stub, SubscriberStubMock)
     Application.put_env(:weddell, :project, "weddell")
+    Application.delete_env(:weddell, :no_connect_on_start)
   end
 
   describe "Weddell application" do
