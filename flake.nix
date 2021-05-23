@@ -40,7 +40,11 @@
         # `nix develop`
         devShell = pkgs.mkShell
           {
-            inherit buildInputs nativeBuildInputs;
+            inherit nativeBuildInputs;
+            buildInputs =  with pkgs; [
+              direnv
+              google-cloud-sdk jre
+            ] ++ buildInputs;
           } // buildEnvVars;
       }
     );
